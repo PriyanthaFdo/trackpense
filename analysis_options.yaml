@@ -1,0 +1,34 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # --- Style ---
+    prefer_single_quotes: true
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    prefer_final_fields: true
+    prefer_final_locals: true
+    use_super_parameters: true
+    always_use_package_imports: true
+    require_trailing_commas: true
+
+    # --- Code safety ---
+    avoid_print: true # use logger instead
+    avoid_redundant_argument_values: true
+    avoid_returning_null_for_future: true
+    cancel_subscriptions: true
+    close_sinks: true
+    unawaited_futures: true
+
+    # --- Readability ---
+    cascade_invocations: true
+    unnecessary_this: true
+    directives_ordering: true
+    sort_constructors_first: true
+    sort_unnamed_constructors_first: true
+    type_annotate_public_apis: true
+    prefer_typing_uninitialized_variables: true
+
+formatter:
+  page_width: 200
+  trailing_commas: preserve
