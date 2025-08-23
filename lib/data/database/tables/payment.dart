@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:trackpense/src/data/constants/kjp_constants.dart';
+import 'package:trackpense/data/constants/kjp_constants.dart';
 
 class Payment extends Table {
   TextColumn get uuid => text().clientDefault(() => KjpConstants.uuid.v4())();

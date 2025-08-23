@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:trackpense/src/data/constants/kjp_constants.dart';
-import 'package:trackpense/src/data/database/tables/payment.dart';
+import 'package:trackpense/data/constants/kjp_constants.dart';
+import 'package:trackpense/data/database/tables/payment.dart';
 
 part 'database.g.dart';
 
