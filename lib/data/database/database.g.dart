@@ -16,7 +16,7 @@ class $PaymentTable extends Payment with TableInfo<$PaymentTable, PaymentData> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    clientDefault: () => KjpConstants.uuid.v4(),
+    clientDefault: () => KjpMiscellaneous.uuid.v4(),
   );
   static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override

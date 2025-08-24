@@ -1,0 +1,1 @@
+To generate database `dart run build_runner build`

@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:trackpense/data/constants/kjp_constants.dart';
+import 'package:trackpense/data/constants/kjp_miscellaneous.dart';
 import 'package:trackpense/data/database/tables/payment.dart';
 
 part 'database.g.dart';
@@ -15,7 +15,7 @@ class AppDatabase extends _$AppDatabase {
 
   static QueryExecutor _openConnection() {
     return driftDatabase(
-      name: KjpConstants.databaseName,
+      name: KjpMiscellaneous.databaseName,
       web: DriftWebOptions(
         sqlite3Wasm: Uri.parse('sqlite3.wasm'),
         driftWorker: Uri.parse('drift_worker.js'),

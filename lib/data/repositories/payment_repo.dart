@@ -1,9 +1,10 @@
+import 'package:drift/drift.dart';
 import 'package:trackpense/data/database/database.dart';
 
 class PaymentRepo {
-  PaymentRepo({required this.database});
+  PaymentRepo(this._db);
 
-  final AppDatabase database;
+  final AppDatabase _db;
 
   Future<int> createPayment({
     required DateTime dateTime,
@@ -11,8 +12,8 @@ class PaymentRepo {
     required double amount,
     required bool isExpense,
   }) async {
-    return await database
-        .into(database.payment)
+    return await _db
+        .into(_db.payment)
         .insert(
           PaymentCompanion.insert(
             date: dateTime,
@@ -23,7 +24,7 @@ class PaymentRepo {
         );
   }
 
-  Future<List<PaymentData>> getAllPayments() async {
-    return await database.select(database.payment).get();
+  Stream<List<PaymentData>> watchAllPayments() {
+    return (_db.select(_db.payment)..orderBy([(p) => OrderingTerm.desc(p.date)])).watch();
   }
 }

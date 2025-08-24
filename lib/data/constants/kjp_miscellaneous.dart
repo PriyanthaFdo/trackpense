@@ -1,6 +1,6 @@
 import 'package:uuid/uuid.dart';
 
-class KjpConstants {
+class KjpMiscellaneous {
   static const String databaseName = 'trackpense.db';
   static const uuid = Uuid();
 }
