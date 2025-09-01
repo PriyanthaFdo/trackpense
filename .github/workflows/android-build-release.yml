@@ -1,0 +1,92 @@
+name: Build & Release Flutter APK
+# Flutter version to build the apk is retrieved from the .fvmrc file
+
+on:
+  push:
+    branches:
+      - master # Run this workflow when pushing to the release branch
+
+permissions:
+  contents: write # To allow the token to create releases
+  id-token: write # If required for OAuth authentication
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version-file: pubspec.yaml
+          cache: true
+
+      - name: Extract Version from pubspec.yaml
+        id: version
+        run: |
+          # Ensure pubspec.yaml exists
+          if [ ! -f pubspec.yaml ]; then
+            echo "Error: pubspec.yaml not found!" >&2
+            exit 1
+          fi
+
+          # Extract version from pubspec.yaml
+          VERSION=$(grep '^version: ' pubspec.yaml | awk '{print $2}')
+
+          # Check if version was extracted
+          if [ -z "$VERSION" ]; then
+            echo "Error: Failed to extract version from pubspec.yaml!" >&2
+            exit 1
+          fi
+
+          # Debugging output
+          echo "Extracted version: $VERSION"
+
+          # Replace + with _ to ensure a valid tag name
+          VERSION_SANITIZED=$(echo "$VERSION" | sed 's/+/_/g')
+
+          echo "Sanitized version: $VERSION_SANITIZED"
+          echo "VERSION=$VERSION_SANITIZED" >> $GITHUB_OUTPUT
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Built APK
+        uses: actions/download-artifact@v4
+        with:
+          name: flutter-apk
+          path: build/app/outputs/flutter-apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.build.outputs.version }}_${{ github.run_number }}
+          name: "Release v${{ needs.build.outputs.version }}"
+          draft: false
+          prerelease: false
+          files: build/app/outputs/flutter-apk/app-release.apk

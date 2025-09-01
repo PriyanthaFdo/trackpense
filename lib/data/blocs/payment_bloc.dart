@@ -10,6 +10,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       super(PaymentLoadingState()) {
     on<GetAllPaymentsEvent>(_handleGetAllPaymentsEvent);
     on<CreatePaymentEvent>(_handleCreatePaymentEvent);
+    on<UpdatePaymentEvent>(_handleUpdatePaymentEvent);
   }
 
   final PaymentRepo _repo;
@@ -27,7 +28,19 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   Future<void> _handleCreatePaymentEvent(CreatePaymentEvent event, Emitter<PaymentState> emit) async {
     try {
       await _repo.createPayment(
-        dateTime: event.dateTime,
+        description: event.description,
+        amount: event.amount,
+        isExpense: event.isExpense,
+      );
+    } catch (e, s) {
+      emit(PaymentErrorState(error: e, stackTrace: s));
+    }
+  }
+
+  Future<void> _handleUpdatePaymentEvent(UpdatePaymentEvent event, Emitter<PaymentState> emit) async {
+    try {
+      await _repo.updatePayment(
+        uuid: event.uuid,
         description: event.description,
         amount: event.amount,
         isExpense: event.isExpense,
@@ -45,13 +58,25 @@ class GetAllPaymentsEvent extends PaymentEvent {}
 
 class CreatePaymentEvent extends PaymentEvent {
   CreatePaymentEvent({
-    required this.dateTime,
     required this.description,
     required this.amount,
     required this.isExpense,
   });
 
-  final DateTime dateTime;
+  final String description;
+  final double amount;
+  final bool isExpense;
+}
+
+class UpdatePaymentEvent extends PaymentEvent {
+  UpdatePaymentEvent({
+    required this.uuid,
+    required this.description,
+    required this.amount,
+    required this.isExpense,
+  });
+
+  final String uuid;
   final String description;
   final double amount;
   final bool isExpense;

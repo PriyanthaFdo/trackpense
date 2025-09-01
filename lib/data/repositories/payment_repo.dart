@@ -7,7 +7,6 @@ class PaymentRepo {
   final AppDatabase _db;
 
   Future<int> createPayment({
-    required DateTime dateTime,
     required String description,
     required double amount,
     required bool isExpense,
@@ -16,12 +15,27 @@ class PaymentRepo {
         .into(_db.payment)
         .insert(
           PaymentCompanion.insert(
-            date: dateTime,
             description: description,
             amount: amount,
             isExpense: isExpense,
           ),
         );
+  }
+
+  Future<void> updatePayment({
+    required String uuid,
+    required String description,
+    required double amount,
+    required bool isExpense,
+  }) async {
+    await _db.update(_db.payment).replace(
+      PaymentCompanion(
+        uuid: Value(uuid),
+        description: Value(description),
+        amount: Value(amount),
+        isExpense: Value(isExpense),
+      ),
+    );
   }
 
   Stream<List<PaymentData>> watchAllPayments() {
