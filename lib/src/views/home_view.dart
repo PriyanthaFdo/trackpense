@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trackpense/core/extensions/color_extension.dart';
 import 'package:trackpense/core/extensions/double_extension.dart';
 import 'package:trackpense/core/extensions/string_extension.dart';
 import 'package:trackpense/core/utils/comma_seperated_decimal_text_input_formatter.dart';
 import 'package:trackpense/core/utils/decimal_text_input_formatter.dart';
 import 'package:trackpense/data/blocs/payment_bloc.dart';
+import 'package:trackpense/data/constants/kjp_colors.dart';
 import 'package:trackpense/src/widgets/item_card.dart';
 import 'package:trackpense/src/widgets/loading.dart';
 
@@ -41,41 +43,6 @@ class _HomeViewState extends State<HomeView> {
               itemCount: state.payments.length,
               itemBuilder: (context, index) {
                 final payment = state.payments[index];
-                // return ListTile(
-                //   // contentPadding: EdgeInsets.zero,
-                //   title: Text(payment.description),
-                //   leading: SizedBox.square(
-                //     dimension: 30,
-                //     child: Column(
-                //       children: [
-                //         Text(
-                //           payment.date.format(format: 'MMM'),
-                //           style: const TextStyle(fontWeight: FontWeight.bold),
-                //         ),
-                //         Text(
-                //           payment.date.format(format: 'dd'),
-                //           style: const TextStyle(
-                //             fontWeight: FontWeight.bold,
-                //             fontSize: 16,
-                //           ),
-                //         ),
-                //         Text(payment.date.format(format: 'yyyy')),
-                //       ],
-                //     ),
-                //   ),
-                //   onTap: () => _showCreatePaymentDialog(
-                //     uuid: payment.uuid,
-                //     description: payment.description,
-                //     amount: payment.amount,
-                //     isExpense: payment.isExpense,
-                //   ),
-                //   subtitle: Text(
-                //     '${payment.date.toLocal()}'.split('.')[0], // date + time
-                //     style: const TextStyle(fontSize: 12),
-                //   ),
-                //   tileColor: payment.isExpense ? Colors.red[100] : Colors.green[100],
-                //   trailing: Text(payment.amount.toCommaString()),
-                // );
                 return ItemCard(
                   amount: payment.amount,
                   date: payment.date,
@@ -116,6 +83,7 @@ class _HomeViewState extends State<HomeView> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Add Transaction'),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
           content: Form(
             key: formKey,
             autovalidateMode: AutovalidateMode.onUnfocus,
@@ -150,25 +118,28 @@ class _HomeViewState extends State<HomeView> {
                   // Expense / Income toggle using parent RadioGroup
                   StatefulBuilder(
                     builder: (context, setState) {
-                      return RadioGroup<bool>(
-                        groupValue: isExpense,
-                        onChanged: (val) => setState(() => isExpense = val!),
-                        child: const Row(
-                          children: [
-                            Expanded(
-                              child: RadioListTile<bool>(
-                                value: true,
-                                title: Text('Expense'),
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Income'),
+                          const SizedBox(width: 12),
+                          Switch.adaptive(
+                            value: isExpense,
+                            activeTrackColor: KjpColors.expense.darken(0.2),
+                            inactiveTrackColor: KjpColors.income.darken(0.2),
+                            inactiveThumbColor: Colors.white,
+                            thumbIcon: const WidgetStatePropertyAll(
+                              Icon(
+                                Icons.circle,
+                                size: 24,
+                                color: Colors.white,
                               ),
                             ),
-                            Expanded(
-                              child: RadioListTile<bool>(
-                                value: false,
-                                title: Text('Income'),
-                              ),
-                            ),
-                          ],
-                        ),
+                            onChanged: (val) => setState(() => isExpense = val),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text('Expense'),
+                        ],
                       );
                     },
                   ),

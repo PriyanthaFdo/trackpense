@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:trackpense/core/extensions/color_extension.dart';
 import 'package:trackpense/core/extensions/datetime_extension.dart';
 import 'package:trackpense/core/extensions/double_extension.dart';
+import 'package:trackpense/data/constants/kjp_colors.dart';
 
 class ItemCard extends StatelessWidget {
   const ItemCard({
@@ -23,7 +25,7 @@ class ItemCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        color: isExpense ? Colors.red[100] : Colors.green[100],
+        color: isExpense ? KjpColors.expense.lighten(0.8) : KjpColors.income.lighten(0.8),
 
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
