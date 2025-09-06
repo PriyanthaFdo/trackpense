@@ -26,6 +26,7 @@ class ItemCard extends StatelessWidget {
       onTap: onTap,
       child: Card(
         color: isExpense ? KjpColors.expense.lighten(0.8) : KjpColors.income.lighten(0.8),
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
 
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
