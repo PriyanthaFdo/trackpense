@@ -1,2 +1,3 @@
-## 1.0.1
-- Creating/Updating transaction now displays a switch instead of readio buttons for Income/Expense selection.
+## 1.1.0
+ - Income/Expense is now selected with a switch instead of radio buttons.
+ - Date and time can now be set to any day within the last 7 days.

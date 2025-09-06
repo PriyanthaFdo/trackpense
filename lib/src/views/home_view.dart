@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trackpense/core/extensions/color_extension.dart';
+import 'package:trackpense/core/extensions/datetime_extension.dart';
 import 'package:trackpense/core/extensions/double_extension.dart';
 import 'package:trackpense/core/extensions/string_extension.dart';
 import 'package:trackpense/core/utils/comma_seperated_decimal_text_input_formatter.dart';
@@ -53,6 +54,7 @@ class _HomeViewState extends State<HomeView> {
                     description: payment.description,
                     amount: payment.amount,
                     isExpense: payment.isExpense,
+                    dateTime: payment.date,
                   ),
                 );
               },
@@ -70,6 +72,7 @@ class _HomeViewState extends State<HomeView> {
     String? description,
     double? amount,
     bool isExpense = true,
+    DateTime? dateTime,
   }) {
     final formKey = GlobalKey<FormState>();
     final descriptionController = TextEditingController();
@@ -77,6 +80,7 @@ class _HomeViewState extends State<HomeView> {
 
     descriptionController.text = description ?? '';
     amountController.text = amount?.toCommaString() ?? '';
+    final displayDateTime = ValueNotifier<DateTime>(dateTime ?? DateTime.now());
 
     showDialog(
       context: context,
@@ -115,7 +119,6 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Expense / Income toggle using parent RadioGroup
                   StatefulBuilder(
                     builder: (context, setState) {
                       return Row(
@@ -143,6 +146,70 @@ class _HomeViewState extends State<HomeView> {
                       );
                     },
                   ),
+                  const SizedBox(height: 12),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ValueListenableBuilder(
+                        valueListenable: displayDateTime,
+                        builder: (_, value, __) => Text(displayDateTime.value.format(format: 'dd/MMM/yyyy')),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(backgroundColor: KjpColors.primary.lighten(0.8)),
+                        child: const Icon(Icons.calendar_month),
+                        onPressed: () async {
+                          final selectedDate = await showDatePicker(
+                            context: context,
+                            initialDate: displayDateTime.value,
+                            firstDate: DateTime.now().subtract(const Duration(days: 7)),
+                            lastDate: DateTime.now(),
+                          );
+
+                          if (selectedDate != null) {
+                            displayDateTime.value = displayDateTime.value.copyWith(
+                              year: selectedDate.year,
+                              month: selectedDate.month,
+                              day: selectedDate.day,
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ValueListenableBuilder(
+                        valueListenable: displayDateTime,
+                        builder: (_, value, __) => Text(displayDateTime.value.format(format: 'hh:mm a')),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(backgroundColor: KjpColors.primary.lighten(0.8)),
+                        child: const Icon(Icons.watch_later_outlined),
+                        onPressed: () async {
+                          final selectedTime = await showTimePicker(
+                            context: context,
+                            initialEntryMode: TimePickerEntryMode.input,
+                            initialTime: TimeOfDay.fromDateTime(displayDateTime.value),
+                          );
+
+                          if (selectedTime != null) {
+                            displayDateTime.value = displayDateTime.value.copyWith(
+                              hour: selectedTime.hour,
+                              minute: selectedTime.minute,
+                              second: 0,
+                              millisecond: 0,
+                              microsecond: 0,
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                 ],
               ),
             ),
@@ -162,6 +229,7 @@ class _HomeViewState extends State<HomeView> {
                         description: descriptionController.text,
                         amount: amountController.text.toCleanDouble(),
                         isExpense: isExpense,
+                        dateTime: displayDateTime.value,
                       ),
                     );
                   } else {
@@ -171,6 +239,7 @@ class _HomeViewState extends State<HomeView> {
                         description: descriptionController.text,
                         amount: amountController.text.toCleanDouble(),
                         isExpense: isExpense,
+                        dateTime: displayDateTime.value,
                       ),
                     );
                   }

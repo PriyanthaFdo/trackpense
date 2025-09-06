@@ -31,6 +31,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         description: event.description,
         amount: event.amount,
         isExpense: event.isExpense,
+        dateTime: event.dateTime,
       );
     } catch (e, s) {
       emit(PaymentErrorState(error: e, stackTrace: s));
@@ -44,6 +45,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         description: event.description,
         amount: event.amount,
         isExpense: event.isExpense,
+        dateTime: event.dateTime,
       );
     } catch (e, s) {
       emit(PaymentErrorState(error: e, stackTrace: s));
@@ -61,11 +63,13 @@ class CreatePaymentEvent extends PaymentEvent {
     required this.description,
     required this.amount,
     required this.isExpense,
+    required this.dateTime,
   });
 
   final String description;
   final double amount;
   final bool isExpense;
+  final DateTime dateTime;
 }
 
 class UpdatePaymentEvent extends PaymentEvent {
@@ -74,12 +78,14 @@ class UpdatePaymentEvent extends PaymentEvent {
     required this.description,
     required this.amount,
     required this.isExpense,
+    required this.dateTime,
   });
 
   final String uuid;
   final String description;
   final double amount;
   final bool isExpense;
+  final DateTime dateTime;
 }
 
 // ======== STATES ========

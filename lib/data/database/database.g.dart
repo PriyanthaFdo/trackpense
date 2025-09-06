@@ -25,8 +25,7 @@ class $PaymentTable extends Payment with TableInfo<$PaymentTable, PaymentData> {
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    clientDefault: () => DateTime.now(),
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _descriptionMeta = const VerificationMeta(
     'description',
@@ -97,6 +96,8 @@ class $PaymentTable extends Payment with TableInfo<$PaymentTable, PaymentData> {
         _dateMeta,
         date.isAcceptableOrUnknown(data['date']!, _dateMeta),
       );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
@@ -289,12 +290,13 @@ class PaymentCompanion extends UpdateCompanion<PaymentData> {
   });
   PaymentCompanion.insert({
     this.uuid = const Value.absent(),
-    this.date = const Value.absent(),
+    required DateTime date,
     required String description,
     required double amount,
     required bool isExpense,
     this.rowid = const Value.absent(),
-  }) : description = Value(description),
+  }) : date = Value(date),
+       description = Value(description),
        amount = Value(amount),
        isExpense = Value(isExpense);
   static Insertable<PaymentData> custom({
@@ -385,7 +387,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$PaymentTableCreateCompanionBuilder =
     PaymentCompanion Function({
       Value<String> uuid,
-      Value<DateTime> date,
+      required DateTime date,
       required String description,
       required double amount,
       required bool isExpense,
@@ -546,7 +548,7 @@ class $$PaymentTableTableManager
           createCompanionCallback:
               ({
                 Value<String> uuid = const Value.absent(),
-                Value<DateTime> date = const Value.absent(),
+                required DateTime date,
                 required String description,
                 required double amount,
                 required bool isExpense,

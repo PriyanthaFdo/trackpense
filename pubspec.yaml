@@ -2,7 +2,7 @@ name: trackpense
 description: "A Flutter project used to track your daily income and expenses"
 publish_to: 'none'
 
-version: 1.0.1
+version: 1.1.0
 
 environment:
   sdk: ^3.9.0

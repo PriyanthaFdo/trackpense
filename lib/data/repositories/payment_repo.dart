@@ -10,6 +10,7 @@ class PaymentRepo {
     required String description,
     required double amount,
     required bool isExpense,
+    required DateTime dateTime,
   }) async {
     return await _db
         .into(_db.payment)
@@ -18,6 +19,7 @@ class PaymentRepo {
             description: description,
             amount: amount,
             isExpense: isExpense,
+            date: dateTime,
           ),
         );
   }
@@ -27,6 +29,7 @@ class PaymentRepo {
     required String description,
     required double amount,
     required bool isExpense,
+    required DateTime dateTime,
   }) async {
     await _db.update(_db.payment).replace(
       PaymentCompanion(
@@ -34,6 +37,7 @@ class PaymentRepo {
         description: Value(description),
         amount: Value(amount),
         isExpense: Value(isExpense),
+        date: Value(dateTime),
       ),
     );
   }
