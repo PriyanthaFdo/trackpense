@@ -37,7 +37,7 @@ class $PaymentTable extends Payment with TableInfo<$PaymentTable, PaymentData> {
     false,
     additionalChecks: GeneratedColumn.checkTextLength(
       minTextLength: 1,
-      maxTextLength: 255,
+      maxTextLength: 200,
     ),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
@@ -65,6 +65,15 @@ class $PaymentTable extends Payment with TableInfo<$PaymentTable, PaymentData> {
       'CHECK ("is_expense" IN (0, 1))',
     ),
   );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     uuid,
@@ -72,6 +81,7 @@ class $PaymentTable extends Payment with TableInfo<$PaymentTable, PaymentData> {
     description,
     amount,
     isExpense,
+    notes,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -126,6 +136,12 @@ class $PaymentTable extends Payment with TableInfo<$PaymentTable, PaymentData> {
     } else if (isInserting) {
       context.missing(_isExpenseMeta);
     }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
     return context;
   }
 
@@ -155,6 +171,10 @@ class $PaymentTable extends Payment with TableInfo<$PaymentTable, PaymentData> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_expense'],
       )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
     );
   }
 
@@ -170,12 +190,14 @@ class PaymentData extends DataClass implements Insertable<PaymentData> {
   final String description;
   final double amount;
   final bool isExpense;
+  final String? notes;
   const PaymentData({
     required this.uuid,
     required this.date,
     required this.description,
     required this.amount,
     required this.isExpense,
+    this.notes,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -185,6 +207,9 @@ class PaymentData extends DataClass implements Insertable<PaymentData> {
     map['description'] = Variable<String>(description);
     map['amount'] = Variable<double>(amount);
     map['is_expense'] = Variable<bool>(isExpense);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
     return map;
   }
 
@@ -195,6 +220,9 @@ class PaymentData extends DataClass implements Insertable<PaymentData> {
       description: Value(description),
       amount: Value(amount),
       isExpense: Value(isExpense),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
     );
   }
 
@@ -209,6 +237,7 @@ class PaymentData extends DataClass implements Insertable<PaymentData> {
       description: serializer.fromJson<String>(json['description']),
       amount: serializer.fromJson<double>(json['amount']),
       isExpense: serializer.fromJson<bool>(json['isExpense']),
+      notes: serializer.fromJson<String?>(json['notes']),
     );
   }
   @override
@@ -220,6 +249,7 @@ class PaymentData extends DataClass implements Insertable<PaymentData> {
       'description': serializer.toJson<String>(description),
       'amount': serializer.toJson<double>(amount),
       'isExpense': serializer.toJson<bool>(isExpense),
+      'notes': serializer.toJson<String?>(notes),
     };
   }
 
@@ -229,12 +259,14 @@ class PaymentData extends DataClass implements Insertable<PaymentData> {
     String? description,
     double? amount,
     bool? isExpense,
+    Value<String?> notes = const Value.absent(),
   }) => PaymentData(
     uuid: uuid ?? this.uuid,
     date: date ?? this.date,
     description: description ?? this.description,
     amount: amount ?? this.amount,
     isExpense: isExpense ?? this.isExpense,
+    notes: notes.present ? notes.value : this.notes,
   );
   PaymentData copyWithCompanion(PaymentCompanion data) {
     return PaymentData(
@@ -245,6 +277,7 @@ class PaymentData extends DataClass implements Insertable<PaymentData> {
           : this.description,
       amount: data.amount.present ? data.amount.value : this.amount,
       isExpense: data.isExpense.present ? data.isExpense.value : this.isExpense,
+      notes: data.notes.present ? data.notes.value : this.notes,
     );
   }
 
@@ -255,13 +288,15 @@ class PaymentData extends DataClass implements Insertable<PaymentData> {
           ..write('date: $date, ')
           ..write('description: $description, ')
           ..write('amount: $amount, ')
-          ..write('isExpense: $isExpense')
+          ..write('isExpense: $isExpense, ')
+          ..write('notes: $notes')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(uuid, date, description, amount, isExpense);
+  int get hashCode =>
+      Object.hash(uuid, date, description, amount, isExpense, notes);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -270,7 +305,8 @@ class PaymentData extends DataClass implements Insertable<PaymentData> {
           other.date == this.date &&
           other.description == this.description &&
           other.amount == this.amount &&
-          other.isExpense == this.isExpense);
+          other.isExpense == this.isExpense &&
+          other.notes == this.notes);
 }
 
 class PaymentCompanion extends UpdateCompanion<PaymentData> {
@@ -279,6 +315,7 @@ class PaymentCompanion extends UpdateCompanion<PaymentData> {
   final Value<String> description;
   final Value<double> amount;
   final Value<bool> isExpense;
+  final Value<String?> notes;
   final Value<int> rowid;
   const PaymentCompanion({
     this.uuid = const Value.absent(),
@@ -286,6 +323,7 @@ class PaymentCompanion extends UpdateCompanion<PaymentData> {
     this.description = const Value.absent(),
     this.amount = const Value.absent(),
     this.isExpense = const Value.absent(),
+    this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PaymentCompanion.insert({
@@ -294,6 +332,7 @@ class PaymentCompanion extends UpdateCompanion<PaymentData> {
     required String description,
     required double amount,
     required bool isExpense,
+    this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : date = Value(date),
        description = Value(description),
@@ -305,6 +344,7 @@ class PaymentCompanion extends UpdateCompanion<PaymentData> {
     Expression<String>? description,
     Expression<double>? amount,
     Expression<bool>? isExpense,
+    Expression<String>? notes,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -313,6 +353,7 @@ class PaymentCompanion extends UpdateCompanion<PaymentData> {
       if (description != null) 'description': description,
       if (amount != null) 'amount': amount,
       if (isExpense != null) 'is_expense': isExpense,
+      if (notes != null) 'notes': notes,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -323,6 +364,7 @@ class PaymentCompanion extends UpdateCompanion<PaymentData> {
     Value<String>? description,
     Value<double>? amount,
     Value<bool>? isExpense,
+    Value<String?>? notes,
     Value<int>? rowid,
   }) {
     return PaymentCompanion(
@@ -331,6 +373,7 @@ class PaymentCompanion extends UpdateCompanion<PaymentData> {
       description: description ?? this.description,
       amount: amount ?? this.amount,
       isExpense: isExpense ?? this.isExpense,
+      notes: notes ?? this.notes,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -353,6 +396,9 @@ class PaymentCompanion extends UpdateCompanion<PaymentData> {
     if (isExpense.present) {
       map['is_expense'] = Variable<bool>(isExpense.value);
     }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -367,6 +413,7 @@ class PaymentCompanion extends UpdateCompanion<PaymentData> {
           ..write('description: $description, ')
           ..write('amount: $amount, ')
           ..write('isExpense: $isExpense, ')
+          ..write('notes: $notes, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -391,6 +438,7 @@ typedef $$PaymentTableCreateCompanionBuilder =
       required String description,
       required double amount,
       required bool isExpense,
+      Value<String?> notes,
       Value<int> rowid,
     });
 typedef $$PaymentTableUpdateCompanionBuilder =
@@ -400,6 +448,7 @@ typedef $$PaymentTableUpdateCompanionBuilder =
       Value<String> description,
       Value<double> amount,
       Value<bool> isExpense,
+      Value<String?> notes,
       Value<int> rowid,
     });
 
@@ -434,6 +483,11 @@ class $$PaymentTableFilterComposer
 
   ColumnFilters<bool> get isExpense => $composableBuilder(
     column: $table.isExpense,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -471,6 +525,11 @@ class $$PaymentTableOrderingComposer
     column: $table.isExpense,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PaymentTableAnnotationComposer
@@ -498,6 +557,9 @@ class $$PaymentTableAnnotationComposer
 
   GeneratedColumn<bool> get isExpense =>
       $composableBuilder(column: $table.isExpense, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 }
 
 class $$PaymentTableTableManager
@@ -536,6 +598,7 @@ class $$PaymentTableTableManager
                 Value<String> description = const Value.absent(),
                 Value<double> amount = const Value.absent(),
                 Value<bool> isExpense = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PaymentCompanion(
                 uuid: uuid,
@@ -543,6 +606,7 @@ class $$PaymentTableTableManager
                 description: description,
                 amount: amount,
                 isExpense: isExpense,
+                notes: notes,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -552,6 +616,7 @@ class $$PaymentTableTableManager
                 required String description,
                 required double amount,
                 required bool isExpense,
+                Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PaymentCompanion.insert(
                 uuid: uuid,
@@ -559,6 +624,7 @@ class $$PaymentTableTableManager
                 description: description,
                 amount: amount,
                 isExpense: isExpense,
+                notes: notes,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

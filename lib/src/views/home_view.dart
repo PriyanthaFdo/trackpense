@@ -49,12 +49,14 @@ class _HomeViewState extends State<HomeView> {
                   date: payment.date,
                   description: payment.description,
                   isExpense: payment.isExpense,
+                  notes: payment.notes,
                   onTap: () => _showCreatePaymentDialog(
                     uuid: payment.uuid,
                     description: payment.description,
                     amount: payment.amount,
                     isExpense: payment.isExpense,
                     dateTime: payment.date,
+                    notes: payment.notes,
                   ),
                 );
               },
@@ -73,13 +75,16 @@ class _HomeViewState extends State<HomeView> {
     double? amount,
     bool isExpense = true,
     DateTime? dateTime,
+    String? notes,
   }) {
     final formKey = GlobalKey<FormState>();
     final descriptionController = TextEditingController();
     final amountController = TextEditingController();
+    final notesController = TextEditingController();
 
     descriptionController.text = description ?? '';
     amountController.text = amount?.toCommaString() ?? '';
+    notesController.text = notes ?? '';
     final displayDateTime = ValueNotifier<DateTime>(dateTime ?? DateTime.now());
 
     showDialog(
@@ -95,6 +100,7 @@ class _HomeViewState extends State<HomeView> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Description
                   TextFormField(
                     controller: descriptionController,
                     decoration: const InputDecoration(
@@ -102,6 +108,8 @@ class _HomeViewState extends State<HomeView> {
                     ),
                     validator: (value) => value == null || value.isEmpty ? 'Required' : null,
                   ),
+
+                  // Amount
                   TextFormField(
                     controller: amountController,
                     decoration: const InputDecoration(
@@ -119,6 +127,7 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   const SizedBox(height: 12),
 
+                  // Expense/ Income Switch
                   StatefulBuilder(
                     builder: (context, setState) {
                       return Row(
@@ -148,6 +157,7 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   const SizedBox(height: 12),
 
+                  // Date
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -179,6 +189,7 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   const SizedBox(height: 12),
 
+                  // Time
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -210,6 +221,18 @@ class _HomeViewState extends State<HomeView> {
                     ],
                   ),
                   const SizedBox(height: 12),
+
+                  // Notes
+                  TextField(
+                    controller: notesController,
+                    keyboardType: TextInputType.multiline,
+                    minLines: 3,
+                    maxLines: 6,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your text here...',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -230,6 +253,7 @@ class _HomeViewState extends State<HomeView> {
                         amount: amountController.text.toCleanDouble(),
                         isExpense: isExpense,
                         dateTime: displayDateTime.value,
+                        notes: notesController.text,
                       ),
                     );
                   } else {
@@ -240,6 +264,7 @@ class _HomeViewState extends State<HomeView> {
                         amount: amountController.text.toCleanDouble(),
                         isExpense: isExpense,
                         dateTime: displayDateTime.value,
+                        notes: notesController.text,
                       ),
                     );
                   }

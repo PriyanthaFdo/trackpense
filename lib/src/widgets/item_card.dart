@@ -12,6 +12,7 @@ class ItemCard extends StatelessWidget {
     required this.amount,
     required this.onTap,
     required this.isExpense,
+    this.notes,
   });
 
   final DateTime date;
@@ -19,6 +20,7 @@ class ItemCard extends StatelessWidget {
   final double amount;
   final VoidCallback onTap;
   final bool isExpense;
+  final String? notes;
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +69,7 @@ class ItemCard extends StatelessWidget {
                     style: const TextStyle(fontSize: 12),
                   ),
                   Text(description),
+                  if (notes != null) const Text('...'),
                 ],
               ),
               const Spacer(),
