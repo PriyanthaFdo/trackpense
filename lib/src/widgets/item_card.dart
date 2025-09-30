@@ -35,46 +35,58 @@ class ItemCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                children: [
-                  Text(
-                    date.format(format: 'E'),
-                    style: const TextStyle(
-                      fontSize: 14,
+              // Date
+              SizedBox.square(
+                dimension: 55,
+                child: Column(
+                  children: [
+                    Text(
+                      date.format(format: 'E'),
+                      style: const TextStyle(fontSize: 14),
                     ),
-                  ),
-                  Text(
-                    date.format(format: 'dd'),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      height: 0.7,
-                      fontSize: 24,
+                    Text(
+                      date.format(format: 'dd'),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        height: 0.7,
+                        fontSize: 24,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    date.format(format: 'MMMM'),
-                    style: const TextStyle(
-                      fontSize: 10,
+                    const SizedBox(height: 4),
+                    Text(
+                      date.format(format: 'MMMM'),
+                      style: const TextStyle(
+                        fontSize: 10,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    date.format(format: 'hh:mm a'),
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  Text(description),
-                  if (notes != null) const Text('...'),
-                ],
+
+              // Time and description
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      date.format(format: 'hh:mm a'),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    Text(
+                      description,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (notes != null && notes!.isNotEmpty) const Text('...'),
+                  ],
+                ),
               ),
-              const Spacer(),
+
+              // Amount
               Center(
-                child: Text(amount.toCommaString()),
+                child: Text(
+                  amount.toCommaString(),
+                ),
               ),
             ],
           ),
