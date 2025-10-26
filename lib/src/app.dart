@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trackpense/data/blocs/payment_bloc.dart';
+import 'package:trackpense/data/blocs/ui_bloc.dart';
 import 'package:trackpense/data/database/database.dart';
 import 'package:trackpense/src/router.dart';
 
@@ -13,6 +14,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   late final AppDatabase _database;
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +26,7 @@ class _AppState extends State<App> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => PaymentBloc(_database)),
+        BlocProvider(create: (context) => UiBloc()),
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,

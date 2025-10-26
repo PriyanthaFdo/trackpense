@@ -16,12 +16,12 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   final PaymentRepo _repo;
 
   Future<void> _handleGetAllPaymentsEvent(GetAllPaymentsEvent event, Emitter<PaymentState> emit) async {
-    emit(PaymentLoadingState());
+    emit(state.loadingState());
 
     await emit.forEach<List<PaymentData>>(
       _repo.watchAllPayments(),
-      onData: (payments) => PaymentLoadedState(payments: payments),
-      onError: (error, stackTrace) => PaymentErrorState(error: error, stackTrace: stackTrace),
+      onData: (payments) => state.loadedState(payments),
+      onError: (error, stackTrace) => state.errorState(error: error, stackTrace: stackTrace),
     );
   }
 
@@ -35,9 +35,10 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         notes: event.notes,
       );
     } catch (e, s) {
-      emit(PaymentErrorState(error: e, stackTrace: s));
+      emit(state.errorState(error: e, stackTrace: s));
     }
   }
+
 
   Future<void> _handleUpdatePaymentEvent(UpdatePaymentEvent event, Emitter<PaymentState> emit) async {
     try {
@@ -50,7 +51,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         notes: event.notes,
       );
     } catch (e, s) {
-      emit(PaymentErrorState(error: e, stackTrace: s));
+      emit(state.errorState(error: e, stackTrace: s));
     }
   }
 }
@@ -95,24 +96,42 @@ class UpdatePaymentEvent extends PaymentEvent {
 }
 
 // ======== STATES ========
-sealed class PaymentState {}
-
-class PaymentLoadingState extends PaymentState {}
-
-class PaymentLoadedState extends PaymentState {
-  PaymentLoadedState({required this.payments});
+sealed class PaymentState {
+  PaymentState({required this.payments});
 
   final List<PaymentData> payments;
+
+  PaymentLoadingState loadingState() => PaymentLoadingState(payments: payments);
+  PaymentLoadedState loadedState(List<PaymentData>? payments) => PaymentLoadedState(payments: payments ?? this.payments);
+  PaymentErrorState errorState({
+    required Object error,
+    required StackTrace stackTrace,
+    String? message,
+  }) => PaymentErrorState(
+    payments: payments,
+    error: error,
+    stackTrace: stackTrace,
+    message: message,
+  );
+}
+
+class PaymentLoadingState extends PaymentState {
+  PaymentLoadingState({super.payments = const []});
+}
+
+class PaymentLoadedState extends PaymentState {
+  PaymentLoadedState({required super.payments});
 }
 
 class PaymentErrorState extends PaymentState {
   PaymentErrorState({
+    required super.payments,
     required this.error,
-    this.stackTrace,
+    required this.stackTrace,
     this.message,
   });
 
   final Object error;
-  final StackTrace? stackTrace;
+  final StackTrace stackTrace;
   final String? message;
 }

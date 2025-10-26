@@ -7,9 +7,9 @@ import 'package:trackpense/core/extensions/string_extension.dart';
 import 'package:trackpense/core/utils/comma_seperated_decimal_text_input_formatter.dart';
 import 'package:trackpense/core/utils/decimal_text_input_formatter.dart';
 import 'package:trackpense/data/blocs/payment_bloc.dart';
+import 'package:trackpense/data/blocs/ui_bloc.dart';
 import 'package:trackpense/data/constants/kjp_colors.dart';
 import 'package:trackpense/src/widgets/item_card.dart';
-import 'package:trackpense/src/widgets/loading.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -20,11 +20,14 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   late final PaymentBloc _paymentBloc;
+  late final UiBloc _uiBloc;
 
   @override
   void initState() {
     super.initState();
     _paymentBloc = context.read<PaymentBloc>();
+    _uiBloc = context.read<UiBloc>();
+
     _paymentBloc.add(GetAllPaymentsEvent());
   }
 
@@ -37,33 +40,45 @@ class _HomeViewState extends State<HomeView> {
         child: const Icon(Icons.add),
       ),
       body: BlocConsumer<PaymentBloc, PaymentState>(
-        listener: (_, __) {},
-        builder: (context, state) {
-          if (state is PaymentLoadedState) {
-            return ListView.builder(
-              itemCount: state.payments.length,
-              itemBuilder: (context, index) {
-                final payment = state.payments[index];
-                return ItemCard(
-                  amount: payment.amount,
-                  date: payment.date,
-                  description: payment.description,
-                  isExpense: payment.isExpense,
-                  notes: payment.notes,
-                  onTap: () => _showCreatePaymentDialog(
-                    uuid: payment.uuid,
-                    description: payment.description,
-                    amount: payment.amount,
-                    isExpense: payment.isExpense,
-                    dateTime: payment.date,
-                    notes: payment.notes,
-                  ),
-                );
-              },
-            );
+        listener: (_, state) {
+          if (state is PaymentLoadingState) {
+            _uiBloc.add(UiLoadingEvent());
           } else {
-            return loading();
+            _uiBloc.add(UiReadyEvent());
           }
+
+          if (state is PaymentErrorState) {
+            _uiBloc.add(
+              UiErrorEvent(
+                message: state.message,
+                error: state.error,
+                stackTrace: state.stackTrace,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          return ListView.builder(
+            itemCount: state.payments.length,
+            itemBuilder: (context, index) {
+              final payment = state.payments[index];
+              return ItemCard(
+                amount: payment.amount,
+                date: payment.date,
+                description: payment.description,
+                isExpense: payment.isExpense,
+                notes: payment.notes,
+                onTap: () => _showCreatePaymentDialog(
+                  uuid: payment.uuid,
+                  description: payment.description,
+                  amount: payment.amount,
+                  isExpense: payment.isExpense,
+                  dateTime: payment.date,
+                  notes: payment.notes,
+                ),
+              );
+            },
+          );
         },
       ),
     );
@@ -206,7 +221,6 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     );
                   }
-                  Navigator.pop(context);
                 }
               },
             ),

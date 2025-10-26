@@ -44,7 +44,7 @@ class _LoadingIndicatorHandler {
       builder: (context) => Stack(
         children: [
           ModalBarrier(color: Colors.black.withValues(alpha: 0.5), dismissible: false),
-          loading(null),
+          loading(),
         ],
       ),
     );
