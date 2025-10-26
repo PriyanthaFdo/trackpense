@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trackpense/data/database/database.dart';
+import 'package:trackpense/data/models/payment_model.dart';
 import 'package:trackpense/data/repositories/payment_repo.dart';
 
 class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
@@ -28,11 +29,13 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   Future<void> _handleCreatePaymentEvent(CreatePaymentEvent event, Emitter<PaymentState> emit) async {
     try {
       await _repo.createPayment(
-        description: event.description,
-        amount: event.amount,
-        isExpense: event.isExpense,
-        dateTime: event.dateTime,
-        notes: event.notes,
+        PaymentModel(
+          description: event.description,
+          amount: event.amount,
+          isExpense: event.isExpense,
+          dateTime: event.dateTime,
+          notes: event.notes,
+        ),
       );
 
       emit(state.readyState());
@@ -44,12 +47,14 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   Future<void> _handleUpdatePaymentEvent(UpdatePaymentEvent event, Emitter<PaymentState> emit) async {
     try {
       await _repo.updatePayment(
-        uuid: event.uuid,
-        description: event.description,
-        amount: event.amount,
-        isExpense: event.isExpense,
-        dateTime: event.dateTime,
-        notes: event.notes,
+        PaymentModel(
+          uuid: event.uuid,
+          description: event.description,
+          amount: event.amount,
+          isExpense: event.isExpense,
+          dateTime: event.dateTime,
+          notes: event.notes,
+        ),
       );
 
       emit(state.readyState());

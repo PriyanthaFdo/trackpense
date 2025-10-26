@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trackpense/data/blocs/ui_bloc.dart';
+import 'package:trackpense/data/models/payment_model.dart';
+import 'package:trackpense/src/router/route_names.dart';
 import 'package:trackpense/src/views/home_view.dart';
+import 'package:trackpense/src/views/payment_form_view.dart';
 import 'package:trackpense/src/widgets/loading.dart';
 
 final router = GoRouter(
@@ -43,8 +46,17 @@ final router = GoRouter(
       },
       routes: [
         GoRoute(
-          path: '/',
+          path: RouteNames.home,
+          name: RouteNames.home,
           builder: (context, state) => const HomeView(),
+        ),
+        GoRoute(
+          path: RouteNames.paymentForm,
+          name: RouteNames.paymentForm,
+          builder: (context, state) {
+            final payment = state.extra as PaymentModel?;
+            return PaymentFormView(payment: payment);
+          },
         ),
       ],
     ),
