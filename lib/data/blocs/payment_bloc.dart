@@ -34,11 +34,12 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         dateTime: event.dateTime,
         notes: event.notes,
       );
+
+      emit(state.readyState());
     } catch (e, s) {
       emit(state.errorState(error: e, stackTrace: s));
     }
   }
-
 
   Future<void> _handleUpdatePaymentEvent(UpdatePaymentEvent event, Emitter<PaymentState> emit) async {
     try {
@@ -50,6 +51,8 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         dateTime: event.dateTime,
         notes: event.notes,
       );
+
+      emit(state.readyState());
     } catch (e, s) {
       emit(state.errorState(error: e, stackTrace: s));
     }
@@ -103,6 +106,7 @@ sealed class PaymentState {
 
   PaymentLoadingState loadingState() => PaymentLoadingState(payments: payments);
   PaymentLoadedState loadedState(List<PaymentData>? payments) => PaymentLoadedState(payments: payments ?? this.payments);
+  PaymentReadyState readyState() => PaymentReadyState(payments: payments);
   PaymentErrorState errorState({
     required Object error,
     required StackTrace stackTrace,
@@ -121,6 +125,10 @@ class PaymentLoadingState extends PaymentState {
 
 class PaymentLoadedState extends PaymentState {
   PaymentLoadedState({required super.payments});
+}
+
+class PaymentReadyState extends PaymentState {
+  PaymentReadyState({required super.payments});
 }
 
 class PaymentErrorState extends PaymentState {

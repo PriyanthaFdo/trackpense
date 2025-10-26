@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:trackpense/core/extensions/color_extension.dart';
 import 'package:trackpense/core/extensions/datetime_extension.dart';
 import 'package:trackpense/core/extensions/double_extension.dart';
@@ -10,6 +11,7 @@ import 'package:trackpense/data/blocs/payment_bloc.dart';
 import 'package:trackpense/data/blocs/ui_bloc.dart';
 import 'package:trackpense/data/constants/kjp_colors.dart';
 import 'package:trackpense/src/widgets/item_card.dart';
+import 'package:trackpense/src/widgets/my_widgets/my_text_form_field.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -45,6 +47,11 @@ class _HomeViewState extends State<HomeView> {
             _uiBloc.add(UiLoadingEvent());
           } else {
             _uiBloc.add(UiReadyEvent());
+          }
+
+          if(state is PaymentReadyState){
+            // pop the data input dialog
+            context.pop();
           }
 
           if (state is PaymentErrorState) {
@@ -116,20 +123,21 @@ class _HomeViewState extends State<HomeView> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Description
-                  TextFormField(
+                  MyTextFormField(
                     controller: descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                    ),
-                    validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+                    showTextLengthCounter: true,
+                    labelText: 'Description',
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return 'Required';
+                      return null;
+                    },
                   ),
 
                   // Amount
-                  TextFormField(
+                  MyTextFormField(
                     controller: amountController,
-                    decoration: const InputDecoration(
-                      labelText: 'Amount',
-                    ),
+                    labelText: 'Amount',
                     keyboardType: TextInputType.number,
                     inputFormatters: [
                       DecimalTextInputFormatter(decimalDigits: 2),
@@ -176,15 +184,13 @@ class _HomeViewState extends State<HomeView> {
                   const SizedBox(height: 12),
 
                   // Notes
-                  TextField(
+                  MyTextFormField(
                     controller: notesController,
                     keyboardType: TextInputType.multiline,
                     minLines: 3,
                     maxLines: 6,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your text here...',
-                      border: OutlineInputBorder(),
-                    ),
+                    hintText: 'Enter your text here...',
+                    outlineBOrder: true,
                   ),
                 ],
               ),
