@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class MyTextFormField extends StatefulWidget {
-  const MyTextFormField({
+class KjpTextFormField extends StatefulWidget {
+  const KjpTextFormField({
     super.key,
     required this.controller,
     this.showTextLengthCounter = false,
@@ -30,10 +30,10 @@ class MyTextFormField extends StatefulWidget {
   final String? hintText;
 
   @override
-  State<MyTextFormField> createState() => _MyTextFormFieldState();
+  State<KjpTextFormField> createState() => _KjpTextFormFieldState();
 }
 
-class _MyTextFormFieldState extends State<MyTextFormField> {
+class _KjpTextFormFieldState extends State<KjpTextFormField> {
   @override
   Widget build(BuildContext context) {
     final textLength = widget.controller.text.length;

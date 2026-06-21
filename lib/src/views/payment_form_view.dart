@@ -10,7 +10,7 @@ import 'package:trackpense/core/utils/decimal_text_input_formatter.dart';
 import 'package:trackpense/data/blocs/payment_bloc.dart';
 import 'package:trackpense/data/constants/kjp_colors.dart';
 import 'package:trackpense/data/models/payment_model.dart';
-import 'package:trackpense/src/widgets/my_widgets/my_text_form_field.dart';
+import 'package:trackpense/src/widgets/kjp_widgets/kjp_text_form_field.dart';
 
 class PaymentFormView extends StatefulWidget {
   const PaymentFormView({super.key, this.payment});
@@ -48,134 +48,140 @@ class _PaymentFormViewState extends State<PaymentFormView> {
 
     return Scaffold(
       appBar: AppBar(title: Text('${isCreate ? 'Create' : 'Edit'} Transaction')),
-      body: Column(
-        children: [
-          Form(
-            key: formKey,
-            autovalidateMode: AutovalidateMode.onUnfocus,
-            child: SingleChildScrollView(
-              child: BlocListener<PaymentBloc, PaymentState>(
-                listener: (context, state) {
-                  if (state is PaymentReadyState) {
-                    context.pop();
-                  }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Description
-                    MyTextFormField(
-                      controller: descriptionController,
-                      showTextLengthCounter: true,
-                      labelText: 'Description',
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) return 'Required';
-                        return null;
-                      },
-                    ),
+      body: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            Form(
+              key: formKey,
+              autovalidateMode: AutovalidateMode.onUnfocus,
+              child: SingleChildScrollView(
+                child: BlocListener<PaymentBloc, PaymentState>(
+                  listener: (context, state) {
+                    if (state is PaymentReadyState) {
+                      context.pop();
+                    }
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Description
+                      KjpTextFormField(
+                        controller: descriptionController,
+                        showTextLengthCounter: true,
+                        labelText: 'Description',
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return 'Required';
+                          return null;
+                        },
+                      ),
 
-                    // Amount
-                    MyTextFormField(
-                      controller: amountController,
-                      labelText: 'Amount',
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        DecimalTextInputFormatter(decimalDigits: 2),
-                        CommaSeparatedInputFormatter(),
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) return 'Required';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
+                      // Amount
+                      KjpTextFormField(
+                        controller: amountController,
+                        labelText: 'Amount',
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          DecimalTextInputFormatter(decimalDigits: 2),
+                          CommaSeparatedInputFormatter(),
+                        ],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return 'Required';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
 
-                    // Expense/ Income Switch
-                    StatefulBuilder(
-                      builder: (context, setState) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('Income'),
-                            const SizedBox(width: 12),
-                            Switch.adaptive(
-                              value: isExpense,
-                              activeTrackColor: KjpColors.expense.darken(0.2),
-                              inactiveTrackColor: KjpColors.income.darken(0.2),
-                              inactiveThumbColor: Colors.white,
-                              thumbIcon: const WidgetStatePropertyAll(
-                                Icon(
-                                  Icons.circle,
-                                  size: 24,
-                                  color: Colors.white,
+                      // Expense/ Income Switch
+                      StatefulBuilder(
+                        builder: (context, setState) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('Income'),
+                              const SizedBox(width: 12),
+                              Switch.adaptive(
+                                value: isExpense,
+                                activeTrackColor: KjpColors.expense.darken(0.2),
+                                inactiveTrackColor: KjpColors.income.darken(0.2),
+                                inactiveThumbColor: Colors.white,
+                                thumbIcon: const WidgetStatePropertyAll(
+                                  Icon(
+                                    Icons.circle,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
                                 ),
+                                onChanged: (val) => setState(() => isExpense = val),
                               ),
-                              onChanged: (val) => setState(() => isExpense = val),
-                            ),
-                            const SizedBox(width: 12),
-                            const Text('Expense'),
-                          ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
+                              const SizedBox(width: 12),
+                              const Text('Expense'),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
 
-                    _dateTimeSelectors(dateTimeNotifier),
-                    const SizedBox(height: 12),
+                      _dateTimeSelectors(dateTimeNotifier),
+                      const SizedBox(height: 12),
 
-                    // Notes
-                    MyTextFormField(
-                      controller: notesController,
-                      keyboardType: TextInputType.multiline,
-                      minLines: 3,
-                      maxLines: 6,
-                      hintText: 'Enter your text here...',
-                      outlineBOrder: true,
-                    ),
-                  ],
+                      // Notes
+                      KjpTextFormField(
+                        controller: notesController,
+                        keyboardType: TextInputType.multiline,
+                        minLines: 3,
+                        maxLines: 6,
+                        hintText: 'Enter your text here...',
+                        outlineBOrder: true,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: () {
-                  if (formKey.currentState!.validate()) {
-                    if (isCreate) {
-                      _paymentBloc.add(
-                        CreatePaymentEvent(
-                          description: descriptionController.text,
-                          amount: amountController.text.toCleanDouble(),
-                          isExpense: isExpense,
-                          dateTime: dateTimeNotifier.value,
-                          notes: notesController.text,
-                        ),
-                      );
-                    } else {
-                      _paymentBloc.add(
-                        UpdatePaymentEvent(
-                          uuid: widget.payment!.uuid!,
-                          description: descriptionController.text,
-                          amount: amountController.text.toCleanDouble(),
-                          isExpense: isExpense,
-                          dateTime: dateTimeNotifier.value,
-                          notes: notesController.text,
-                        ),
-                      );
+            const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton(
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      if (isCreate) {
+                        _paymentBloc.add(
+                          CreatePaymentEvent(
+                            description: descriptionController.text,
+                            amount: amountController.text.toCleanDouble(),
+                            isExpense: isExpense,
+                            dateTime: dateTimeNotifier.value,
+                            notes: notesController.text,
+                          ),
+                        );
+                      } else {
+                        _paymentBloc.add(
+                          UpdatePaymentEvent(
+                            uuid: widget.payment!.uuid!,
+                            description: descriptionController.text,
+                            amount: amountController.text.toCleanDouble(),
+                            isExpense: isExpense,
+                            dateTime: dateTimeNotifier.value,
+                            notes: notesController.text,
+                          ),
+                        );
+                      }
                     }
-                  }
-                },
-                child: const Text('Save'),
-              ),
-            ],
-          ),
-        ],
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
