@@ -5,7 +5,7 @@ import 'package:trackpense/core/extensions/color_extension.dart';
 import 'package:trackpense/core/extensions/datetime_extension.dart';
 import 'package:trackpense/core/extensions/double_extension.dart';
 import 'package:trackpense/core/extensions/string_extension.dart';
-import 'package:trackpense/core/utils/comma_seperated_decimal_text_input_formatter.dart';
+import 'package:trackpense/core/utils/comma_separated_decimal_text_input_formatter.dart';
 import 'package:trackpense/core/utils/decimal_text_input_formatter.dart';
 import 'package:trackpense/data/blocs/payment_bloc.dart';
 import 'package:trackpense/data/constants/kjp_colors.dart';
