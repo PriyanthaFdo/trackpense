@@ -58,7 +58,15 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Decode Android Keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/shared-debug.keystore
+
       - name: Build APK
+        env:
+          SIGNING_STORE_FILE: "shared-debug.keystore"
+          SIGNING_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: flutter build apk --release --no-pub
 
       - name: Upload APK Artifact

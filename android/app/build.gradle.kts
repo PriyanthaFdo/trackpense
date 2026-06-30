@@ -15,21 +15,34 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.trackpense"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("sharedConfig") {
+            // In Kotlin DSL, assignments must use the '=' operator
+            storeFile = file(System.getenv("SIGNING_STORE_FILE") ?: "shared-debug.keystore")
+            storePassword = System.getenv("SIGNING_STORE_PASSWORD") ?: "android"
+            keyAlias = System.getenv("SIGNING_KEY_ALIAS") ?: "androiddebugkey"
+            keyPassword = System.getenv("SIGNING_KEY_PASSWORD") ?: "android"
+        }
+    }
+
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+        getByName("debug") {
+            // Reference the signing config cleanly using the named container
+            signingConfig = signingConfigs.getByName("sharedConfig")
+        }
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("sharedConfig")
+            
+            isMinifyEnabled = false 
+            // In Kotlin, proguardFiles requires a spread operator (*) for the array argument
+            setProguardFiles(listOf(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"))
         }
     }
 }
