@@ -1,4 +1,4 @@
-package com.example.trackpense
+package com.kjp.trackpense
 
 import io.flutter.embedding.android.FlutterActivity
 
