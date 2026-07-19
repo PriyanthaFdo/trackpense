@@ -9,15 +9,15 @@ environment:
   flutter: 3.44.5
 
 dependencies:
-  drift: ^2.28.1
   drift_flutter: ^0.2.5
-  path_provider: ^2.1.5
+  drift: ^2.28.1
+  flutter_bloc: ^9.1.1
   flutter: {sdk: flutter}
   go_router: ^16.1.0
-  uuid: ^4.5.1
-  flutter_bloc: ^9.1.1
-  loading_indicator: ^3.1.1
   intl: any
+  loading_indicator: ^3.1.1
+  path_provider: ^2.1.5
+  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_lints: ^5.0.0

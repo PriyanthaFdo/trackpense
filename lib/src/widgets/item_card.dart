@@ -79,7 +79,7 @@ class ItemCard extends StatelessWidget {
                     ),
                     if (notes != null && notes!.isNotEmpty)
                       Text(
-                        notes!,
+                        _singleLineWithEllipsis(notes!),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -103,4 +103,12 @@ class ItemCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _singleLineWithEllipsis(String text) {
+  final hasNewLine = text.contains('\n');
+
+  final firstLine = text.split('\n').first;
+
+  return hasNewLine ? '$firstLine .....' : firstLine;
 }
