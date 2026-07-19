@@ -77,7 +77,16 @@ class ItemCard extends StatelessWidget {
                       description,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (notes != null && notes!.isNotEmpty) const Text('...'),
+                    if (notes != null && notes!.isNotEmpty)
+                      Text(
+                        notes!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey,
+                        ),
+                      ),
                   ],
                 ),
               ),
