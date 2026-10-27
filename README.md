@@ -21,6 +21,20 @@ After changing Drift tables or `lib/core/database/database.dart`, regenerate the
 fvm dart run build_runner build
 ```
 
+## Web database files
+
+On the web, Drift needs two extra files in `web/`: `drift_worker.js` and `sqlite3.wasm`. They are committed, so a normal build needs nothing extra. Their versions must match the `drift` and `sqlite3` versions in `pubspec.lock`. Run the setup script:
+
+- after recreating `web/` (for example with `flutter create --platforms=web .`);
+- after upgrading `drift` or `sqlite3`.
+
+```bash
+fvm dart run tool/setup_web_db.dart          # download the matching files into web/
+fvm dart run tool/setup_web_db.dart --check  # verify only; exits with code 1 if out of date
+```
+
+Commit the updated files.
+
 ## Android signing
 
 Both debug and release builds are signed with the release keystore, so local and CI builds can be installed over each other. Before building for Android:

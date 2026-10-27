@@ -52,7 +52,7 @@ To inspect the pre-refactor code, run `git show 1d28933:<path>`, for example `gi
 |---|---|---|
 | Flutter / Dart | Flutter **3.44.5** (pinned in `.fvmrc` and in `pubspec.yaml` `environment.flutter`) | Uses [FVM](https://fvm.app). Prefer `fvm flutter ...`. |
 | State management | `flutter_bloc` | Two BLoCs: `TransactionBloc` (feature) and `UiBloc` (app-wide loading and error UI). |
-| Persistence | `drift` + `drift_flutter` (SQLite) | Code generation through `drift_dev` + `build_runner`. Native platforms (Android, Windows) use the native SQLite bundled by `sqlite3_flutter_libs`. Web uses `web/sqlite3.wasm` + `web/drift_worker.js`. |
+| Persistence | `drift` + `drift_flutter` (SQLite) | Code generation through `drift_dev` + `build_runner`. Native platforms (Android, Windows) use the native SQLite bundled by `sqlite3_flutter_libs`. Web uses `web/sqlite3.wasm` + `web/drift_worker.js`, which must match the locked `sqlite3`/`drift` versions (see `tool/setup_web_db.dart`). |
 | Routing | `go_router` | One `ShellRoute` with two child routes. |
 | Dependency injection | `get_it` | Registrations live in `lib/core/di/service_locator.dart`. |
 | Misc | `intl`, `uuid`, `loading_indicator`, `path_provider` | |
@@ -66,6 +66,7 @@ See [README.md](README.md) for setup commands, Android signing and the release p
 
 - `fvm flutter pub get`, then `fvm flutter run -d windows` (or `chrome`, or an Android device).
 - After changing Drift tables, run `fvm dart run build_runner build`. Never edit `database.g.dart` by hand.
+- After recreating `web/` or upgrading `drift`/`sqlite3`, run `fvm dart run tool/setup_web_db.dart` to download the matching web database files. Commit the result.
 - **Android builds, debug included, need `android/key.properties`.** Both build types are signed with the release keystore (see [android/app/build.gradle.kts](android/app/build.gradle.kts)). Without that file, Gradle fails.
 - **A debug build on your own phone replaces the installed release app.** Both use the same app ID and key, so the debug build runs database migrations on your real data. Until dev/prod flavors exist, test risky changes on Windows, web, or an emulator.
 - **Merging to `master` publishes a release.** CI ([.github/workflows/android-build-release.yml](.github/workflows/android-build-release.yml)) builds a signed APK and creates a GitHub Release tagged `v<version>_<run_number>`. Day-to-day work goes to `dev` through feature branches.
@@ -110,7 +111,8 @@ lib/
 
 Other top-level items:
 - [docs/archive/](docs/archive/): the AI's original audit, target architecture and migration plan (historical).
-- `web/`: web entry point, including `sqlite3.wasm` and `drift_worker.js` for Drift on the web.
+- `web/`: web entry point, including `sqlite3.wasm` and `drift_worker.js` for Drift on the web. These are managed by `tool/setup_web_db.dart`, so don't edit or replace them by hand.
+- `tool/`: developer scripts. `setup_web_db.dart` downloads the Drift web files that match `pubspec.lock` (`--check` verifies them).
 - `windows/`, `android/`: platform runners.
 - `test/`: empty so far.
 - `design_images/`: UI mock-ups.
