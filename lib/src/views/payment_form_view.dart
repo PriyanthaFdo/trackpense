@@ -9,6 +9,8 @@ import 'package:trackpense/core/extensions/string_extensions.dart';
 import 'package:trackpense/core/theme/app_colors.dart';
 import 'package:trackpense/core/utils/formatters/currency_formatter.dart';
 import 'package:trackpense/core/utils/formatters/decimal_input_formatter.dart';
+import 'package:trackpense/core/utils/validators/amount_validator.dart';
+import 'package:trackpense/core/utils/validators/description_validator.dart';
 import 'package:trackpense/core/widgets/common/inputs/app_text_field.dart';
 import 'package:trackpense/features/transactions/domain/entities/transaction.dart';
 import 'package:trackpense/features/transactions/presentation/blocs/transaction_bloc.dart';
@@ -23,6 +25,7 @@ class PaymentFormView extends StatefulWidget {
 }
 
 class _PaymentFormViewState extends State<PaymentFormView> {
+  final _formKey = GlobalKey<FormState>();
   late final TransactionBloc _transactionBloc;
   late final TextEditingController descriptionController;
   late final TextEditingController amountController;
@@ -62,8 +65,6 @@ class _PaymentFormViewState extends State<PaymentFormView> {
     final isCreate = widget.payment == null;
     if (!isCreate) assert(widget.payment?.uuid != null);
 
-    final formKey = GlobalKey<FormState>();
-
     return Scaffold(
       appBar: AppBar(title: Text('${isCreate ? 'Create' : 'Edit'} Transaction')),
       body: Padding(
@@ -72,7 +73,7 @@ class _PaymentFormViewState extends State<PaymentFormView> {
           children: [
             Expanded(
               child: Form(
-                key: formKey,
+                key: _formKey,
                 autovalidateMode: AutovalidateMode.onUnfocus,
                 child: SingleChildScrollView(
                   child: BlocListener<TransactionBloc, TransactionState>(
@@ -90,10 +91,7 @@ class _PaymentFormViewState extends State<PaymentFormView> {
                           showTextLengthCounter: true,
                           labelText: 'Description',
                           autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) return 'Required';
-                            return null;
-                          },
+                          validator: DescriptionValidator.validate,
                         ),
 
                         // Amount
@@ -105,10 +103,7 @@ class _PaymentFormViewState extends State<PaymentFormView> {
                             DecimalTextInputFormatter(decimalDigits: 2),
                             CommaSeparatedInputFormatter(),
                           ],
-                          validator: (value) {
-                            if (value == null || value.isEmpty) return 'Required';
-                            return null;
-                          },
+                          validator: AmountValidator.validate,
                         ),
                         const SizedBox(height: 12),
 
@@ -265,6 +260,8 @@ class _PaymentFormViewState extends State<PaymentFormView> {
   }
 
   void _submitForm() {
+    if (!_formKey.currentState!.validate()) return;
+
     final amount = amountController.text.toCleanDouble();
     final transaction = Transaction(
       uuid: widget.payment?.uuid ?? AppConfig.uuid.v4(),
