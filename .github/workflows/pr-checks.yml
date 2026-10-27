@@ -1,0 +1,83 @@
+name: PR Checks
+# Runs on every pull request and on pushes to dev. Every check after
+# "Install dependencies" runs even if an earlier one fails, so a single run
+# reports all problems at once.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Format, analyze & test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version-file: pubspec.yaml
+          cache: true
+
+      - name: Install dependencies
+        id: deps
+        run: flutter pub get
+
+      - name: Check formatting
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        # Generated *.g.dart files are excluded; build_runner owns their layout.
+        run: |
+          git ls-files 'lib/*.dart' 'test/*.dart' 'tool/*.dart' \
+            | grep -v '\.g\.dart$' \
+            | xargs dart format --output=none --set-exit-if-changed
+
+      - name: Analyze
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: flutter analyze
+
+      - name: Check generated code is up to date
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          if [ -n "$(git status --porcelain -- lib)" ]; then
+            git status --short -- lib
+            echo "::error::Generated code is stale. Run 'fvm dart run build_runner build --delete-conflicting-outputs' and commit the result."
+            exit 1
+          fi
+
+      - name: Check database schema snapshots
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        # Fails if the Drift schema changed without a schemaVersion bump, or if
+        # a new version's snapshot and migration test were not committed.
+        # database.steps.dart is not tracked yet (see docs/testing/TEST_PLAN.md).
+        run: |
+          dart run drift_dev make-migrations
+          rm -f lib/core/database/database.steps.dart
+          if [ -n "$(git status --porcelain -- drift_schemas test/drift)" ]; then
+            git status --short -- drift_schemas test/drift
+            echo "::error::Schema snapshots are out of date. Run 'fvm dart run drift_dev make-migrations' and commit the result."
+            exit 1
+          fi
+
+      - name: Check web database files
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: dart run tool/setup_web_db.dart --check
+
+      - name: Run tests
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: flutter test
