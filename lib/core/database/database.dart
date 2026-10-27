@@ -44,9 +44,9 @@ class AppDatabase extends _$AppDatabase {
     return await (select(payment)..where((tbl) => tbl.uuid.equals(uuid))).getSingleOrNull();
   }
 
-  /// Watches all payments.
+  /// Watches all payments, newest first.
   Stream<List<PaymentData>> watchAllPayments() {
-    return select(payment).watch();
+    return (select(payment)..orderBy([(tbl) => OrderingTerm.desc(tbl.date)])).watch();
   }
 
   static QueryExecutor _openConnection() {
