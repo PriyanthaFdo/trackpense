@@ -3,50 +3,46 @@
 > **Audience:** developers and AI agents picking up this codebase for the first time.
 > **Purpose:** explain what the app is, how it is built, what state the code is *actually* in, and where the traps are, so you can be productive without re-reading every file.
 >
-> Written 2026-10-27 against branch `dev` (version `1.1.1`), with the AI-driven refactor **staged but not yet committed**. If you're reading this later, check `git log` to see whether that refactor has since been committed, changed, or reverted.
+> Last updated 2026-10-27 (version `1.1.1`, branch `refactor/clean-architecture`). If the code and this document disagree, trust the code and update this file.
 
 ---
 
 ## 1. What the app is
 
-TrackPense is a small, **offline-only personal income and expense tracker** built with Flutter. A single user records transactions on their own device. There is no backend, no accounts, and no sync.
+TrackPense is a small, **offline-only personal income and expense tracker** built with Flutter. A single user records transactions on their own device. There is no backend, no accounts, and no sync. It is maintained as a product with team-style practices (feature branches, PRs, reviews), even though it currently has one developer.
 
 Current user-facing features:
 
 | Feature | Details |
 |---|---|
-| Transaction list (home) | Shows every transaction as a coloured card: red tint for expenses, green for income. Each card shows the day, date, month, time, description, the first line of the notes, and the amount. |
-| Create a transaction | Description (required, max 200 chars), amount (decimal input with thousands separators, 2 dp), an Income/Expense switch, date and time, and optional multi-line notes. |
+| Transaction list (home) | Newest first. Each transaction is a coloured card: red tint for expenses, green for income. A card shows the day, date, month, time, description, the first line of the notes, and the amount. |
+| Create a transaction | Description (required, max 200 chars), amount (required, > 0, thousands separators, 2 dp), an Income/Expense switch, date and time, and optional multi-line notes. |
 | Edit a transaction | Tap a card. The same form opens, pre-filled. |
-| 7-day date rule | The date picker only allows dates within the last 7 days. For a transaction older than 7 days, the date and time are shown read-only. |
+| Date edit window | The date picker only allows dates within the last 7 days. For a transaction older than that, the date and time are shown read-only. |
 
 Not implemented: deleting from the UI (the use case exists but no UI calls it), categories, accounts, budgets, reports, search, attachments, export, settings, theming, or dark mode.
 
-**Target platforms:** Android (the main target, released through CI), Web, and Windows. Those are the only platform folders. There is no iOS, macOS, or Linux.
+**Target platforms:** Android (the main target, released through CI), Web, and Windows. There is no iOS, macOS, or Linux.
 
-**Design direction:** [design_images/mobile.png](design_images/mobile.png) and [design_images/desktop.png](design_images/desktop.png) are mock-ups of a redesigned "Create Transaction" form. It has Income/Expense toggle buttons, separate date and time fields, notes, an **attachments** upload, a purple accent colour, and a two-column dialog layout on desktop. **None of this redesign is implemented yet.** The current UI is plain Material defaults.
+**Design direction:** [design_images/mobile.png](design_images/mobile.png) and [design_images/desktop.png](design_images/desktop.png) are mock-ups of a redesigned "Create Transaction" form. It has Income/Expense toggle buttons, separate date and time fields, notes, an **attachments** upload, a purple accent colour, and a two-column dialog layout on desktop. **This redesign is not implemented yet.** The current UI is plain Material defaults.
 
 ---
 
-## 2. Project history (important context)
+## 2. Project history
 
-1. **Original app (commits up to `1d28933`, the `HEAD` of `dev`).** A simple, working app with a "flat" structure: `lib/data/` (blocs, constants, database, models, repositories) and `lib/src/` (app, router, views, widgets). The project's own naming prefix was `Kjp` (for example `KjpColors` and `KjpTextFormField`).
-2. **AI refactor (staged in the git index, uncommitted, untested on a device).** An AI agent ("Cascade AI", i.e. Windsurf) audited the app and started moving it to a **feature-based Clean Architecture**. It wrote three planning documents:
-   - [ARCHITECTURE_AUDIT.md](ARCHITECTURE_AUDIT.md): critique of the original code.
-   - [TARGET_ARCHITECTURE.md](TARGET_ARCHITECTURE.md): the planned end state. It is very ambitious: 12+ features, `app/`, `shared/`, localization, network layer, and more.
-   - [MIGRATION_STRATEGY.md](MIGRATION_STRATEGY.md): an 8-phase plan. Its tracking tables still say "Pending" for everything, so they are **not** a reliable status record.
+1. **Original app (up to commit `1d28933`).** A simple, working app with a flat structure (`lib/data/`, `lib/src/`) and a `Kjp` naming prefix.
+2. **AI refactor (`ff53846`).** An AI agent ("Cascade AI", i.e. Windsurf) started a move to a **feature-based Clean Architecture**: a `core/` layer, a transactions feature with domain/data/presentation layers, and get_it dependency injection. Its planning documents are archived in [docs/archive/](docs/archive/). They describe an aspirational end state, **not** the current code.
+3. **Stabilization (the commits after `ff53846`).** This pass fixed four behaviour regressions from the AI refactor:
+   - form validation was skipped;
+   - the list had lost its newest-first ordering;
+   - notes could not be cleared when editing;
+   - the home screen ran UI side effects inside `build`.
 
-   **The refactor is only partly done.** Roughly: the core layer was created, the transactions feature got domain and data layers plus a new BLoC, and the old `PaymentBloc`, `PaymentRepo`, `PaymentModel` and `Kjp*` constants were deleted. The UI files (`lib/src/views`, `lib/src/widgets`) and `UiBloc` (`lib/data/blocs`) were **not** moved. Nothing from Phases 5–7 exists: no dashboard, no placeholder features, no `app/` or `shared/` folders, no tests, no theme wiring.
+   It also finished moving the UI into the feature folders and deleted unused scaffolding.
 
-To see exactly what the refactor changed:
+To inspect the pre-refactor code, run `git show 1d28933:<path>`, for example `git show 1d28933:lib/data/blocs/payment_bloc.dart`.
 
-```bash
-git diff --cached --stat -M          # file-level summary
-git diff --cached -M -- lib/         # full code diff
-git show HEAD:lib/data/blocs/payment_bloc.dart   # view any pre-refactor file
-```
-
-**Verification status:** `flutter analyze --no-pub` (Flutter 3.44.5) reports **no issues**. The app has **not** been run on a device or emulator since the refactor, and there are **no automated tests**. The `test/core` and `test/features` folders are empty.
+**Verification status:** `flutter analyze` is clean. There are **no automated tests yet**. Manual testing on a device, including upgrading over an existing 1.1.1 install, is still pending.
 
 ---
 
@@ -54,98 +50,72 @@ git show HEAD:lib/data/blocs/payment_bloc.dart   # view any pre-refactor file
 
 | Concern | Choice | Notes |
 |---|---|---|
-| Flutter / Dart | Flutter **3.44.5** (pinned in `.fvmrc` and in `pubspec.yaml` `environment.flutter`), Dart `^3.9.0` | Uses [FVM](https://fvm.app). Prefer `fvm flutter ...`. |
-| State management | `flutter_bloc` ^9.1.1 | Two BLoCs: `TransactionBloc` and `UiBloc`. |
-| Persistence | `drift` ^2.28.1 + `drift_flutter` (SQLite) | Code generation through `drift_dev` + `build_runner`. On web it uses `sqlite3.wasm` + `drift_worker.js` from `web/`. |
-| Routing | `go_router` ^16.1.0 | One `ShellRoute` with two child routes. |
-| Dependency injection | `get_it` ^7.6.4 | Added by the refactor. |
-| Misc | `intl` (formatting), `uuid` (primary keys), `loading_indicator` (overlay spinner), `path_provider` (DB location), `shared_preferences` (added by the refactor, unused at runtime) | |
-| Lints | `flutter_lints` + strict extra rules in [analysis_options.yaml](analysis_options.yaml) | Notable rules: `always_use_package_imports`, `require_trailing_commas`, `prefer_single_quotes`, `avoid_print`, `unawaited_futures`. Formatter page width is 200. |
+| Flutter / Dart | Flutter **3.44.5** (pinned in `.fvmrc` and in `pubspec.yaml` `environment.flutter`) | Uses [FVM](https://fvm.app). Prefer `fvm flutter ...`. |
+| State management | `flutter_bloc` | Two BLoCs: `TransactionBloc` (feature) and `UiBloc` (app-wide loading and error UI). |
+| Persistence | `drift` + `drift_flutter` (SQLite) | Code generation through `drift_dev` + `build_runner`. Native platforms (Android, Windows) use the native SQLite bundled by `sqlite3_flutter_libs`. Web uses `web/sqlite3.wasm` + `web/drift_worker.js`. |
+| Routing | `go_router` | One `ShellRoute` with two child routes. |
+| Dependency injection | `get_it` | Registrations live in `lib/core/di/service_locator.dart`. |
+| Misc | `intl`, `uuid`, `loading_indicator`, `path_provider` | |
+| Lints | `flutter_lints` + strict extra rules in [analysis_options.yaml](analysis_options.yaml) | Notable rules: `always_use_package_imports`, `directives_ordering`, `require_trailing_commas`, `prefer_single_quotes`, `avoid_print`, `unawaited_futures`. Formatter page width is 200. |
 
 ---
 
 ## 4. Getting started
 
-```bash
-fvm install                      # installs Flutter 3.44.5 per .fvmrc
-fvm flutter pub get
-fvm dart run build_runner build  # regenerate Drift code after changing tables or database.dart
-fvm flutter analyze
-fvm flutter run -d windows       # or: -d chrome, or an Android device
-```
+See [README.md](README.md) for setup commands, Android signing and the release process. Key points:
 
-### Android signing (read this before your first Android build)
-
-[android/app/build.gradle.kts](android/app/build.gradle.kts) signs **both debug and release** builds with the `release` signing config. That config reads `android/key.properties`.
-
-- If `android/key.properties` is missing, **every Android build fails**, including debug. The script casts missing properties with `as String`, so Gradle throws.
-- Copy [android/key.properties.example](android/key.properties.example) to `android/key.properties` and point `storeFile` at a keystore. Both files are git-ignored by `android/.gitignore`.
-- This setup is intentional (see CHANGELOG 1.1.1): local and CI builds share one keystore, so builds can be installed over each other.
-- The root [README.md](README.md) still says "debug keystore password: `android`". That is **stale**. The old `build_keys/shared-debug.keystore` has been deleted (staged).
-
-### CI / release
-
-[.github/workflows/android-build-release.yml](.github/workflows/android-build-release.yml) runs on **every push to `master`**. It:
-
-1. Reads the Flutter version from `pubspec.yaml`. The comment in the file says `.fvmrc`, but the workflow actually uses `pubspec.yaml`.
-2. Rebuilds the keystore and `key.properties` from repository secrets: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`.
-3. Builds a release APK.
-4. Publishes a GitHub Release tagged `v<version>_<run_number>`.
-
-Day-to-day work happens on `dev`. **Merging to `master` publishes a release.** Bump `version:` in `pubspec.yaml` and update `CHANGELOG.md` before you merge.
+- `fvm flutter pub get`, then `fvm flutter run -d windows` (or `chrome`, or an Android device).
+- After changing Drift tables, run `fvm dart run build_runner build`. Never edit `database.g.dart` by hand.
+- **Android builds, debug included, need `android/key.properties`.** Both build types are signed with the release keystore (see [android/app/build.gradle.kts](android/app/build.gradle.kts)). Without that file, Gradle fails.
+- **A debug build on your own phone replaces the installed release app.** Both use the same app ID and key, so the debug build runs database migrations on your real data. Until dev/prod flavors exist, test risky changes on Windows, web, or an emulator.
+- **Merging to `master` publishes a release.** CI ([.github/workflows/android-build-release.yml](.github/workflows/android-build-release.yml)) builds a signed APK and creates a GitHub Release tagged `v<version>_<run_number>`. Day-to-day work goes to `dev` through feature branches.
 
 ---
 
-## 5. Directory map: what is live and what is scaffolding
-
-"Live" means the file is reachable from `main.dart` at runtime. Much of the refactor's output is scaffolding that nothing imports yet.
+## 5. Directory map
 
 ```
 lib/
-├── main.dart                          LIVE   runApp(App())
-├── src/                               LIVE   ⚠ legacy location, not yet migrated
-│   ├── app.dart                              App: awaits DI init, provides BLoCs, MaterialApp.router
-│   ├── views/home_view.dart                  transaction list screen
-│   ├── views/payment_form_view.dart          create/edit form (the most complex UI file)
-│   └── widgets/item_card.dart                one transaction card
-├── data/blocs/ui_bloc.dart            LIVE   ⚠ legacy location; global loading/error UI state
-├── features/transactions/             LIVE   new Clean Architecture slice
-│   ├── domain/entities/transaction.dart      Transaction entity (immutable, copyWith, ==)
-│   ├── domain/repositories/transaction_repository.dart   abstract repo + a home-made Either<L,R>
-│   ├── domain/usecases/{create,update,delete,watch}_transaction(s).dart   thin pass-throughs
-│   ├── data/models/transaction_model.dart    maps PaymentData/PaymentCompanion <-> Transaction
-│   ├── data/repositories/transaction_repository_impl.dart   wraps AppDatabase, returns Either<Failure, T>
-│   └── presentation/blocs/transaction_bloc.dart   events/states/BLoC
-└── core/
-    ├── config/app_config.dart         LIVE   constants (DB name, Uuid instance, limits, breakpoints, pref keys)
-    ├── database/                      LIVE   Drift AppDatabase + Payment table + generated code
-    ├── di/service_locator.dart        LIVE   get_it registrations
-    ├── navigation/                    LIVE   GoRouter + RouteNames
-    ├── logging/app_logger.dart        LIVE   wraps dart:developer log, used during startup only
-    ├── error/failures.dart            LIVE   Failure hierarchy (only DatabaseFailure is produced)
-    ├── error/exceptions.dart, error_handler.dart   scaffolding, not used by the feature
-    ├── extensions/{color,datetime,double,string}_extensions.dart   LIVE
-    ├── extensions/context_extensions.dart   UNUSED  (⚠ has bugs, see §9)
-    ├── theme/app_colors.dart          LIVE   palette (primary #0C4776, expense red, income green)
-    ├── theme/{app_spacing,app_typography,app_border_radius}.dart   UNUSED (no ThemeData is built)
-    ├── storage/preferences_service.dart, secure_storage_service.dart   registered in DI, never used
-    ├── storage/storage_service.dart   UNUSED
-    ├── utils/formatters/              LIVE   DecimalTextInputFormatter, CommaSeparatedInputFormatter
-    ├── utils/helpers/{currency,date}_helper.dart   UNUSED
-    ├── utils/validators/{amount,date,description}_validator.dart   UNUSED (the form uses inline validators)
-    └── widgets/
-        ├── common/inputs/app_text_field.dart       LIVE   AppTextFormField (char counter, outline option)
-        ├── common/loading/loading_overlay.dart     LIVE   global Overlay spinner
-        ├── common/loading/loading_indicator.dart   UNUSED
-        ├── common/feedback/{empty_state,error}_widget.dart   UNUSED (⚠ the class named ErrorWidget shadows Flutter's)
-        ├── common/dialogs/confirmation_dialog.dart UNUSED
-        └── layout/responsive_builder.dart          UNUSED (still named KjpViewBuilder)
+├── main.dart                          runApp(App())
+├── app/
+│   └── app.dart                       App: awaits DI init, provides BLoCs, MaterialApp.router
+├── core/                              shared, feature-agnostic code
+│   ├── config/app_config.dart         constants: DB name, Uuid instance, max description length, decimal digits, edit window (7 days)
+│   ├── database/                      Drift AppDatabase, Payment table, generated code
+│   ├── di/service_locator.dart        get_it registrations
+│   ├── error/failures.dart            Failure hierarchy returned by repositories
+│   ├── extensions/                    Color darken/lighten, DateTime.format, double.toCommaString, String.toCleanDouble/toSentenceCase
+│   ├── logging/app_logger.dart        thin wrapper over dart:developer log
+│   ├── navigation/                    GoRouter (app_router.dart) + RouteNames
+│   ├── presentation/blocs/ui_bloc.dart   app-wide loading/error state, rendered by the ShellRoute
+│   ├── theme/app_colors.dart          colour palette (primary #0C4776, expense red, income green)
+│   ├── utils/formatters/              DecimalTextInputFormatter, CommaSeparatedInputFormatter
+│   ├── utils/validators/              DescriptionValidator, AmountValidator (used by the form)
+│   └── widgets/common/                AppTextFormField, LoadingOverlay, EmptyStateWidget
+└── features/
+    └── transactions/
+        ├── domain/                    pure Dart, no Flutter or Drift imports
+        │   ├── entities/transaction.dart
+        │   ├── repositories/transaction_repository.dart   abstract repo + a home-made Either<L, R>
+        │   └── usecases/              Create/Update/Delete/WatchTransaction(s): thin pass-throughs
+        ├── data/
+        │   ├── models/transaction_model.dart   maps PaymentData/PaymentCompanion <-> Transaction
+        │   └── repositories/transaction_repository_impl.dart   wraps AppDatabase, returns Either<Failure, T>
+        └── presentation/
+            ├── blocs/transaction_bloc.dart
+            ├── pages/transaction_list_page.dart   home screen
+            ├── pages/transaction_form_page.dart   create/edit form (the most complex UI file)
+            └── widgets/transaction_card.dart
 ```
 
 Other top-level items:
-- `assets/` contains copies of `sqlite3.wasm` and `drift_worker.js`, but they are **not declared** in `pubspec.yaml`. Web loads the copies in `web/`.
-- `test/` contains empty `core/` and `features/` folders.
-- `build/`, `.dart_tool/`, `.fvm/`, `.idea/`, `trackpense.iml` are tooling artifacts.
+- [docs/archive/](docs/archive/): the AI's original audit, target architecture and migration plan (historical).
+- `web/`: web entry point, including `sqlite3.wasm` and `drift_worker.js` for Drift on the web.
+- `windows/`, `android/`: platform runners.
+- `test/`: empty so far.
+- `design_images/`: UI mock-ups.
+
+**Rule of thumb:** code is added when a feature uses it. Don't create placeholder features or speculative services. Add them when there is an issue to implement.
 
 ---
 
@@ -160,17 +130,16 @@ main() → App (StatefulWidget)
   then: MultiBlocProvider[ UiBloc, TransactionBloc ] → MaterialApp.router(routerConfig: router)
 ```
 
-If DI initialization throws, the error is logged and rethrown, and the app **stays on the spinner forever**.
+If DI initialization throws, the error is logged and rethrown, and the app **stays on the spinner forever**. There is no error screen yet.
 
 ### 6.2 Dependency graph (get_it)
 
 ```
-AppDatabase                (lazy singleton)
-TransactionRepository  →  TransactionRepositoryImpl(AppDatabase)   (factory)
-Create/Update/Delete/WatchTransaction(s)  →  (TransactionRepository)  (factories)
-TransactionBloc(create, update, delete, watch)   (factory, but created once by the BlocProvider in App)
-UiBloc                      (factory, created once by the BlocProvider in App)
-PreferencesService, SecureStorageService(InMemory)   (lazy singletons, never resolved)
+AppDatabase                                     lazy singleton
+TransactionRepository → TransactionRepositoryImpl(AppDatabase)   factory
+Create/Update/Delete/WatchTransaction(s) → (TransactionRepository)   factories
+TransactionBloc(create, update, delete, watch)  factory (created once, by the BlocProvider in App)
+UiBloc                                          factory (created once, by the BlocProvider in App)
 ```
 
 Both BLoCs are **app-global**. They are provided above the router, so every screen shares the same `TransactionBloc` instance.
@@ -178,7 +147,7 @@ Both BLoCs are **app-global**. They are provided above the router, so every scre
 ### 6.3 Layers in the transactions feature
 
 ```
-UI (HomeView / PaymentFormView)
+UI (TransactionListPage / TransactionFormPage)
    │  add(Event)                      ▲ TransactionState
    ▼                                  │
 TransactionBloc ──calls──► UseCase.call() ──► TransactionRepository (abstract)
@@ -191,114 +160,115 @@ TransactionBloc ──calls──► UseCase.call() ──► TransactionReposit
 
 `Either` is a minimal home-made class defined in `transaction_repository.dart`. It is not from `dartz` or `fpdart`. Use `fold(ifLeft, ifRight)`.
 
-### 6.4 State machines
+### 6.4 State flow
 
 **TransactionBloc**
 
 | Event | Behaviour | Emits |
 |---|---|---|
-| `TransactionLoadEvent` (dispatched by `HomeView.initState`) | Subscribes to `watchAllTransactions()` through `emit.forEach` and stays subscribed. | `Loading`, then `Loaded(list)` on every DB change, or `Error(msg)` |
-| `TransactionCreateEvent(tx)` / `TransactionUpdateEvent(tx)` / `TransactionDeleteEvent(uuid)` | Calls the use case. | `Ready` on success, `Error(failure.message)` on failure |
+| `TransactionLoadEvent` (dispatched by `TransactionListPage.initState`) | Subscribes to `watchAllTransactions()` through `emit.forEach` and stays subscribed. | `Loading`, then `Loaded(list)` on every DB change, or `Error(msg)` |
+| `TransactionCreateEvent` / `TransactionUpdateEvent` / `TransactionDeleteEvent` | Calls the use case. | `Ready` on success, `Error(failure.message)` on failure |
 
-Bloc's default event transformer is concurrent, so the long-running Load subscription keeps running while create and update events are handled. After a successful write, the state goes `Ready` → (the DB stream fires) → `Loaded`.
+Bloc's default event transformer is concurrent, so the Load subscription keeps running while writes are handled. After a successful write, the state goes `Ready` → (the DB stream fires) → `Loaded`.
 
-**UiBloc** (global UI chrome)
+**How the UI reacts**
 
-- States: `UiReadyState`, `UiLoadingState`, `UiErrorState(message, title)`.
-- The `ShellRoute` builder in [app_router.dart](lib/core/navigation/app_router.dart) listens to it. `Loading` shows `LoadingOverlay`, any other state dismisses it, and `Error` shows an `AlertDialog`.
-- `HomeView` dispatches `UiLoadingEvent`, `UiReadyEvent` and `UiErrorEvent` **from inside its `BlocBuilder.builder`**, depending on the `TransactionBloc` state.
+- `TransactionListPage` uses a `BlocConsumer`:
+  - The **listener** maps `Loading` → `UiLoadingEvent`, `Error` → `UiErrorEvent`, and anything else → `UiReadyEvent`.
+  - The **builder** only rebuilds on `Loading`/`Loaded` (`buildWhen`), so the last list stays visible during and after a save.
+- `TransactionFormPage` validates the form, dispatches Create or Update, and pops itself when it sees `TransactionReadyState`. On failure it stays open, and the error dialog appears on top.
+- The `ShellRoute` in [app_router.dart](lib/core/navigation/app_router.dart) listens to `UiBloc`. `Loading` shows `LoadingOverlay`, other states dismiss it, and `Error` shows an `AlertDialog`.
 - `LoadingOverlay` is a singleton. It stays visible for at least 1 s once shown, and it throws if it is still showing after 5 minutes.
 
 ### 6.5 Navigation
 
 | Route name / path | Screen | `extra` |
 |---|---|---|
-| `RouteNames.home` = `/` | `HomeView` | none |
-| `RouteNames.paymentForm` = `/payment-form` | `PaymentFormView(payment: Transaction?)` | a `Transaction` for edit, `null` for create |
+| `RouteNames.home` = `/` | `TransactionListPage` | none |
+| `RouteNames.transactionForm` = `/transaction-form` | `TransactionFormPage(transaction: Transaction?)` | a `Transaction` for edit, `null` for create |
 
-Route names are the same strings as their paths. Navigation uses `context.pushNamed(...)` from go_router. Passing the entity through `extra` means deep links to the edit form cannot work.
-
-The form closes itself through a `BlocListener` that calls `context.pop()` when it sees `TransactionReadyState`.
+Route names are the same strings as their paths. Use `context.pushNamed(...)` from go_router. Because the entity is passed through `extra`, deep links to the edit form cannot work.
 
 ---
 
 ## 7. Data model and persistence
 
-The Drift database is [lib/core/database/database.dart](lib/core/database/database.dart) with file name `trackpense.db`. Native platforms store it in `getApplicationSupportDirectory()`; web uses a WASM worker.
+The Drift database is [lib/core/database/database.dart](lib/core/database/database.dart) with file name `trackpense.db`. Native platforms store it in `getApplicationSupportDirectory()`.
 
 **Table `payment`** ([payment_table.dart](lib/core/database/tables/payment_table.dart)). The generated row class is `PaymentData` and the companion is `PaymentCompanion`:
 
 | Column | Type | Constraints |
 |---|---|---|
-| `uuid` | TEXT | **primary key**; client default `Uuid().v4()` |
+| `uuid` | TEXT | **primary key**; client default `Uuid().v4()` (the form also generates one) |
 | `date` | DATETIME | required (Drift's default storage: Unix seconds) |
 | `description` | TEXT | required, length 1–200 |
 | `amount` | REAL | required, always positive; the sign comes from `is_expense` |
 | `is_expense` | BOOL | required |
 | `notes` | TEXT | nullable (added in schema v2) |
 
-- **Schema version: 2.** The v1 → v2 migration adds `notes`. If you change a table, bump `schemaVersion`, add a branch to `onUpgrade`, and re-run `build_runner`. Real user data exists on installed devices, so never break migrations.
-- The domain uses the name **Transaction**, but the database and UI still say **Payment** (`Payment` table, `PaymentFormView`, the `payment` param, `/payment-form`). Treat them as the same thing.
-- The refactor added CRUD helpers on `AppDatabase`: `createPayment`, `updatePayment` (WHERE uuid = …, write), `deletePayment`, `getPayment`, and `watchAllPayments`.
-- `amount` is stored as a `double`. There is no currency or value object. The display format is `#,##0.00`.
+- **Schema version: 2.** The v1 → v2 migration adds `notes`. If you change a table, bump `schemaVersion`, add a branch to `onUpgrade`, and re-run `build_runner`. **Real user data exists on installed devices, so a broken migration is the worst bug this app can have.** Migration tests are planned (Drift schema dumps plus generated migration tests).
+- **Naming:** the domain says **Transaction**; the database layer still says **Payment** (`Payment` table, `PaymentData`, `createPayment`…). `TransactionModel` translates between them. Renaming the SQL table would need a migration, so the names were left as they are on purpose.
+- `AppDatabase` exposes `createPayment`, `updatePayment` (WHERE uuid, write), `deletePayment`, `getPayment`, and `watchAllPayments` (ordered by `date DESC`).
+- `amount` is a `double`. There is no currency or value object. The display format is `#,##0.00`.
 
 ---
 
-## 8. Business rules (where they live today)
+## 8. Business rules
 
 | Rule | Location |
 |---|---|
-| Description required, max 200 chars | DB constraint, plus the `AppTextFormField` counter and `maxLength` (default `AppConfig.maxDescriptionLength`), plus an inline validator in the form |
-| Amount: digits plus one `.`, at most 2 decimals, comma-grouped while typing | `DecimalTextInputFormatter(decimalDigits: 2)` followed by `CommaSeparatedInputFormatter`; parsed with `String.toCleanDouble()` (strips commas, falls back to `0.0`) |
-| New or editable dates must be within the last 7 days | `showDatePicker(firstDate: now − 7d, lastDate: now)` in `payment_form_view.dart` |
-| Transactions older than 7 days: date and time are read-only | `now.difference(date).inDays > 7` in `_dateTimeSelectors` |
+| Description required, not blank, max 200 chars | `DescriptionValidator` in the form; `AppTextFormField` counter and `maxLength`; DB length constraint |
+| Amount required, > 0, max 2 decimals | `AmountValidator` in the form. While typing, `DecimalTextInputFormatter(decimalDigits: 2)` and `CommaSeparatedInputFormatter` shape the input. It is parsed with `String.toCleanDouble()`. |
+| Dates can be picked only within the last `AppConfig.transactionEditWindowDays` (7) days | `showDatePicker(firstDate: …)` in `transaction_form_page.dart` |
+| Transactions older than the window: date and time are read-only | `_dateTimeSelectors` in `transaction_form_page.dart` |
 | Income vs expense | `isExpense` bool; defaults to expense |
 
-`AppConfig.transactionEditWindowDays` (7) and `AppConfig.maxNotesLength` (1000) exist but are **not used**. The 7 is still hardcoded, and notes have no length limit.
+These rules live in the presentation layer. Moving them into the domain (use cases or entity validation) is a reasonable future step once they have tests.
 
 ---
 
-## 9. Known issues and refactor regressions (verify these first)
+## 9. Known issues and technical debt
 
-These were found by reading the code and comparing it with the pre-refactor `HEAD`. None has been confirmed on a device. Items 1–4 are **behaviour regressions** introduced by the refactor.
-
-1. **Form validation is skipped.** The old Save button called `formKey.currentState!.validate()`. The new `_submitForm()` does not, so:
-   - an empty amount is saved as `0.0`;
-   - an empty description reaches Drift, which throws `InvalidDataException`; the user only sees a generic "Failed to create transaction" dialog.
-
-   `formKey` is also re-created on every `build`. It should be a `State` field.
-2. **List ordering was lost.** The old repo ordered by `date DESC`. `AppDatabase.watchAllPayments()` has no `orderBy`, so the order is whatever SQLite returns.
-3. **Notes cannot be cleared on edit.** `TransactionModel.toPaymentCompanion()` uses `Value.absent()` when notes are `null`. An update that clears the notes field leaves the old notes in place. The old code wrote `Value(null)`.
-4. **Error detail was lost.** The repository wraps every exception in `DatabaseFailure('Failed to … transaction')`. `UiBloc`'s special formatting for Drift `InvalidDataException` (field-level messages) can no longer trigger.
-5. **Side effects inside `build`.** `HomeView` dispatches `UiBloc` events from `BlocBuilder.builder`. The pre-refactor version correctly used `BlocConsumer.listener`. The new version also renders an empty body for `Ready` and `Error` states. A failed save leaves the home list **blank** until the DB changes again, because the old states carried the list and the new ones don't.
-6. **Shared global `TransactionBloc`.** The form pops on any `TransactionReadyState`, and the home screen reacts to every state. Adding more screens or features to this BLoC will cause cross-talk. Consider a separate form cubit, or scoping the BLoC per route.
-7. **Delete is unreachable.** `DeleteTransaction` and `TransactionDeleteEvent` exist, but there is no UI for them.
-8. **`watchTransactionsByDateRange`** filters in memory with exclusive bounds and is unused.
-9. **`ContextExtensions` (unused) is buggy.** Its `showDialog` calls itself, which recurses forever. Its `pushNamed` and `pop` clash with go_router's `BuildContext` extensions, so importing both causes ambiguity errors. Fix it or delete it before using it.
-10. **`core/widgets/common/feedback/error_widget.dart` declares `class ErrorWidget`**, which shadows Flutter's own `ErrorWidget`. Rename it, for example to `AppErrorWidget`, before using it.
-11. **No theme.** `MaterialApp.router` gets no `theme`, and `AppTypography`, `AppSpacing` and `AppBorderRadius` are unused.
-12. **Placeholder services.** `SecureStorageService` is registered as `InMemorySecureStorageService`, which is not persistent. `PreferencesService` is never used.
-13. **Stale docs.** The root `README.md` mentions a deleted debug keystore. The tracking tables in `MIGRATION_STRATEGY.md` are not updated.
+1. **Generic error messages.** The repository wraps every exception in `DatabaseFailure('Failed to … transaction')`. `UiBloc` has special formatting for Drift `InvalidDataException`, but that path can no longer trigger. Form validation now catches the common cases first.
+2. **Shared global `TransactionBloc`.** The form pops on any `TransactionReadyState`, and the list reacts to every state. Adding more screens or features to this BLoC will cause cross-talk. Consider a separate form cubit, or scoping the BLoC per route.
+3. **Delete is unreachable.** `DeleteTransaction` and `TransactionDeleteEvent` exist, but there is no UI for them.
+4. **No theme.** `MaterialApp.router` gets no `theme`. Only `AppColors` exists. The redesign will introduce a proper theme.
+5. **No startup error screen.** If DI init fails, the app stays on the spinner.
+6. **No length limit on notes.**
+7. **No dev/prod separation.** Debug and release share an app ID and signing key (see §4).
+8. **No tests**, and no CI checks on pull requests. CI only builds releases on `master`.
 
 ---
 
 ## 10. Conventions
 
-- **Imports:** always `package:trackpense/...` (lint enforced). Keep directives sorted.
-- **Naming:** files use `snake_case`. The `Kjp`/`Kb` prefixes are being phased out in favour of `App*` (`AppColors`, `AppConfig`, `AppTextFormField`). Leftovers: `KjpViewBuilder` and the extension name `KbDateTimeFormatting`.
-- **Feature layout** (from `TARGET_ARCHITECTURE.md`): `features/<name>/{domain/{entities,repositories,usecases}, data/{models,repositories,datasources}, presentation/{blocs|pages|widgets}}`. Domain must not import Flutter or Drift.
+- **Imports:** always `package:trackpense/...`, sorted (both lint enforced; `dart fix --apply` sorts them).
+- **Naming:** files use `snake_case`. Shared widgets and constants use the `App*` prefix (`AppColors`, `AppConfig`, `AppTextFormField`). Feature classes are named after the domain (`TransactionListPage`, `TransactionCard`). One leftover old name: the extension `KbDateTimeFormatting`.
+- **Feature layout:** `features/<name>/{domain/{entities,repositories,usecases}, data/{models,repositories}, presentation/{blocs,pages,widgets}}`. Domain must not import Flutter or Drift. Code shared across features goes in `core/`.
 - **Errors:** repositories catch exceptions and return `Either.left(SomeFailure(...))`. BLoCs `fold` the result into states.
-- **Constants:** put them in `AppConfig`. Colours go in `AppColors`.
-- **Generated code:** never edit `database.g.dart` by hand. Run `dart run build_runner build`.
-- **Releases:** bump `pubspec.yaml` `version`, add a `CHANGELOG.md` entry, then merge `dev` → `master` (CI releases the APK).
+- **Constants** go in `AppConfig`. **Colours** go in `AppColors`.
+- **Commits:** [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `refactor:`, `chore:`, `docs:`), one logical change per commit.
+- **Branches:** `master` holds releases, `dev` is for integration, and short-lived `feat/…`, `fix/…`, `refactor/…` branches merge into `dev` through PRs.
+- **Releases:** bump the `version` in `pubspec.yaml`, add a `CHANGELOG.md` entry, then merge `dev` → `master`.
 
 ---
 
-## 11. Suggested next steps
+## 11. Roadmap
 
-1. **Smoke-test the refactor** on Android, Windows and Web: create, edit, the 7-day rule, notes, and an upgrade from an existing v1.1.1 install so you know the existing DB still opens.
-2. **Fix regressions 1–5 in §9.** They are small and local: restore `validate()`, add `orderBy(date desc)`, use `Value(notes)`, move the UiBloc dispatches into a listener, and keep the last list in state.
-3. **Add tests.** Start with `TransactionRepositoryImpl` against an in-memory Drift DB (`AppDatabase(NativeDatabase.memory())`; the constructor already accepts an executor), then the mappers, the BLoC (`bloc_test`), and the formatters and validators.
-4. **Finish the migration (Phase 4 of the plan) or simplify it.** Move `src/views` and `src/widgets` into `features/transactions/presentation/{pages,widgets}`, move `UiBloc` into `core/`, and delete the unused scaffolding or wire it in (validators, theme). The full target in `TARGET_ARCHITECTURE.md`, with 12 features, network and sync, is far beyond what this app needs today. Treat it as a menu, not a mandate.
-5. **Build the redesigned form** from `design_images/`. Attachments will need a new table, a schema v3 migration, and file storage.
-6. **Update `README.md`** with real setup instructions, or point it to this file.
+1. **Stabilize (this branch).** Fix regressions, finish the folder migration, prune unused code. Remaining: a manual device test, including an upgrade over an existing 1.1.1 install.
+2. **Safety net.**
+   - Unit tests for the repository (in-memory Drift: `AppDatabase(NativeDatabase.memory())`), mappers, use cases, validators and formatters.
+   - `bloc_test` for the BLoCs, plus widget tests for the form.
+   - Drift migration tests.
+   - Dev/prod build flavors with separate app IDs.
+3. **Team workflow.**
+   - PR checks in CI: format, analyze, test, build.
+   - Branch protection on `dev` and `master`.
+   - Releases triggered by tags.
+   - PR and issue templates, `CONTRIBUTING.md`, architecture decision records in `docs/adr/`.
+   - Dependabot, pre-commit hooks, VS Code launch configs, and a GitHub Projects board.
+4. **Product work.**
+   - The redesigned form with a real theme.
+   - Delete in the UI.
+   - Attachments (schema v3).
+   - Later: localization, crash reporting, backup and export.
