@@ -42,7 +42,7 @@ Not implemented: deleting from the UI (the use case exists but no UI calls it), 
 
 To inspect the pre-refactor code, run `git show 1d28933:<path>`, for example `git show 1d28933:lib/data/blocs/payment_bloc.dart`.
 
-**Verification status:** `flutter analyze` is clean. There are **no automated tests yet**. Manual testing on a device, including upgrading over an existing 1.1.1 install, is still pending.
+**Verification status:** `flutter analyze` is clean, and about 105 automated tests (unit, widget, database migration) pass; see [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md). Integration, system and acceptance tests are not built yet. Manual testing on a device, including upgrading over an existing 1.1.1 install, is still pending.
 
 ---
 
@@ -114,7 +114,9 @@ Other top-level items:
 - `web/`: web entry point, including `sqlite3.wasm` and `drift_worker.js` for Drift on the web. These are managed by `tool/setup_web_db.dart`, so don't edit or replace them by hand.
 - `tool/`: developer scripts. `setup_web_db.dart` downloads the Drift web files that match `pubspec.lock` (`--check` verifies them).
 - `windows/`, `android/`: platform runners.
-- `test/`: empty so far.
+- `test/`: unit, widget and migration tests, mirroring `lib/`; shared fakes in `test/helpers/`.
+- `drift_schemas/`: a JSON snapshot of every database schema version, used by the migration tests. Never edit or delete old snapshots.
+- `docs/testing/TEST_PLAN.md`: the test plan, including integration, system and acceptance tests to build.
 - `design_images/`: UI mock-ups.
 
 **Rule of thumb:** code is added when a feature uses it. Don't create placeholder features or speculative services. Add them when there is an issue to implement.
@@ -208,7 +210,7 @@ The Drift database is [lib/core/database/database.dart](lib/core/database/databa
 | `is_expense` | BOOL | required |
 | `notes` | TEXT | nullable (added in schema v2) |
 
-- **Schema version: 2.** The v1 → v2 migration adds `notes`. If you change a table, bump `schemaVersion`, add a branch to `onUpgrade`, and re-run `build_runner`. **Real user data exists on installed devices, so a broken migration is the worst bug this app can have.** Migration tests are planned (Drift schema dumps plus generated migration tests).
+- **Schema version: 2.** The v1 → v2 migration adds `notes`. If you change a table, follow the migration workflow in [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md) §3 (snapshot, `stepByStep` migration, data-integrity test). **Real user data exists on installed devices, so a broken migration is the worst bug this app can have.** Migration tests (`test/drift/`) verify the v1 → v2 upgrade keeps all data.
 - **Naming:** the domain says **Transaction**; the database layer still says **Payment** (`Payment` table, `PaymentData`, `createPayment`…). `TransactionModel` translates between them. Renaming the SQL table would need a migration, so the names were left as they are on purpose.
 - `AppDatabase` exposes `createPayment`, `updatePayment` (WHERE uuid, write), `deletePayment`, `getPayment`, and `watchAllPayments` (ordered by `date DESC`).
 - `amount` is a `double`. There is no currency or value object. The display format is `#,##0.00`.
@@ -238,7 +240,7 @@ These rules live in the presentation layer. Moving them into the domain (use cas
 5. **No startup error screen.** If DI init fails, the app stays on the spinner.
 6. **No length limit on notes.**
 7. **No dev/prod separation.** Debug and release share an app ID and signing key (see §4).
-8. **No tests**, and no CI checks on pull requests. CI only builds releases on `master`.
+8. **No integration, system or acceptance tests yet,** and no CI checks on pull requests (CI only builds releases on `master`). See the plan and open findings in [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md) §4–§8.
 
 ---
 
@@ -259,9 +261,9 @@ These rules live in the presentation layer. Moving them into the domain (use cas
 
 1. **Stabilize (this branch).** Fix regressions, finish the folder migration, prune unused code. Remaining: a manual device test, including an upgrade over an existing 1.1.1 install.
 2. **Safety net.**
-   - Unit tests for the repository (in-memory Drift: `AppDatabase(NativeDatabase.memory())`), mappers, use cases, validators and formatters.
-   - `bloc_test` for the BLoCs, plus widget tests for the form.
-   - Drift migration tests.
+   - ✅ Unit tests (repository on in-memory SQLite, mappers, use cases, validators, formatters), BLoC tests, widget tests for the list, form and card.
+   - ✅ Drift migration tests with schema snapshots.
+   - Integration tests (needs injectable database and clock first), then the system and acceptance checklists. See [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md).
    - Dev/prod build flavors with separate app IDs.
 3. **Team workflow.**
    - PR checks in CI: format, analyze, test, build.
