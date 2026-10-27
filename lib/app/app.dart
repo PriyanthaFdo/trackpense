@@ -25,14 +25,14 @@ class _AppState extends State<App> {
   Future<void> _initializeApp() async {
     try {
       AppLogger.info('Initializing application...');
-      
+
       // Initialize service locator
       await initServiceLocator();
-      
+
       setState(() {
         _initialized = true;
       });
-      
+
       AppLogger.info('Application initialized successfully');
     } catch (e, stackTrace) {
       AppLogger.error('Failed to initialize application', error: e, stackTrace: stackTrace);

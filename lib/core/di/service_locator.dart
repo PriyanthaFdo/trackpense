@@ -29,7 +29,7 @@ Future<void> initServiceLocator() async {
 void _registerCoreServices() {
   // Database
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
-  
+
   AppLogger.debug('Core services registered');
 }
 
@@ -37,8 +37,7 @@ void _registerCoreServices() {
 void _registerDataServices() {
   // Repositories
   getIt
-    ..registerFactory<TransactionRepository>(
-        () => TransactionRepositoryImpl(getIt<AppDatabase>()))
+    ..registerFactory<TransactionRepository>(() => TransactionRepositoryImpl(getIt<AppDatabase>()))
     // Use cases
     ..registerFactory<CreateTransaction>(() => CreateTransaction(getIt()))
     ..registerFactory<UpdateTransaction>(() => UpdateTransaction(getIt()))
@@ -53,12 +52,14 @@ void _registerBlocs() {
   // UI BLoC
   getIt
     ..registerFactory<UiBloc>(() => UiBloc())
-    ..registerFactory<TransactionBloc>(() => TransactionBloc(
-          createTransaction: getIt(),
-          updateTransaction: getIt(),
-          deleteTransaction: getIt(),
-          watchTransactions: getIt(),
-        ));
+    ..registerFactory<TransactionBloc>(
+      () => TransactionBloc(
+        createTransaction: getIt(),
+        updateTransaction: getIt(),
+        deleteTransaction: getIt(),
+        watchTransactions: getIt(),
+      ),
+    );
 
   AppLogger.debug('BLoCs registered');
 }

@@ -55,11 +55,11 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     required UpdateTransaction updateTransaction,
     required DeleteTransaction deleteTransaction,
     required WatchTransactions watchTransactions,
-  })  : _createTransaction = createTransaction,
-        _updateTransaction = updateTransaction,
-        _deleteTransaction = deleteTransaction,
-        _watchTransactions = watchTransactions,
-        super(TransactionReadyState()) {
+  }) : _createTransaction = createTransaction,
+       _updateTransaction = updateTransaction,
+       _deleteTransaction = deleteTransaction,
+       _watchTransactions = watchTransactions,
+       super(TransactionReadyState()) {
     on<TransactionLoadEvent>(_onLoad);
     on<TransactionCreateEvent>(_onCreate);
     on<TransactionUpdateEvent>(_onUpdate);
