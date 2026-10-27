@@ -26,6 +26,21 @@ fvm dart run build_runner build
 
 See [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md) for what is tested, how to write tests, the migration workflow for schema changes, and the integration, system and acceptance tests still to build.
 
+### CI checks
+
+Every pull request (and every push to `dev`) runs `.github/workflows/pr-checks.yml`:
+
+| Check | Fix it locally with |
+|---|---|
+| Formatting (generated `*.g.dart` excluded) | `fvm dart format lib test tool` |
+| `flutter analyze` | Fix the reported issues (`fvm dart fix --apply` handles many) |
+| Generated code is up to date | `fvm dart run build_runner build --delete-conflicting-outputs` |
+| Database schema snapshots match the code | `fvm dart run drift_dev make-migrations` (see the migration workflow in the test plan) |
+| Web database files match the pinned versions | `fvm dart run tool/setup_web_db.dart` |
+| `flutter test` | `fvm flutter test` |
+
+All checks run even if an earlier one fails, so one run lists every problem.
+
 ## Web database files
 
 On the web, Drift needs two extra files in `web/`: `drift_worker.js` and `sqlite3.wasm`. They are committed, so a normal build needs nothing extra. Their versions must match the `drift` and `sqlite3` versions in `pubspec.lock`. Run the setup script:
