@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trackpense/data/blocs/payment_bloc.dart';
+import 'package:trackpense/core/navigation/route_names.dart';
 import 'package:trackpense/data/blocs/ui_bloc.dart';
-import 'package:trackpense/data/models/payment_model.dart';
-import 'package:trackpense/src/router/route_names.dart';
+import 'package:trackpense/features/transactions/presentation/blocs/transaction_bloc.dart';
 import 'package:trackpense/src/widgets/item_card.dart';
 
 class HomeView extends StatefulWidget {
@@ -15,62 +14,63 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  late final PaymentBloc _paymentBloc;
-  late final UiBloc _uiBloc;
-
   @override
   void initState() {
     super.initState();
-    _paymentBloc = context.read<PaymentBloc>();
-    _uiBloc = context.read<UiBloc>();
-
-    _paymentBloc.add(GetAllPaymentsEvent());
+    context.read<TransactionBloc>().add(TransactionLoadEvent());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Transactions')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.pushNamed(RouteNames.paymentForm),
-        child: const Icon(Icons.add),
+      appBar: AppBar(
+        title: const Text('TrackPense'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => context.pushNamed(RouteNames.paymentForm),
+          ),
+        ],
       ),
-      body: BlocConsumer<PaymentBloc, PaymentState>(
-        listener: (_, state) {
-          if (state is PaymentLoadingState) {
-            _uiBloc.add(UiLoadingEvent());
-          } else {
-            _uiBloc.add(UiReadyEvent());
-          }
-
-          if (state is PaymentErrorState) {
-            _uiBloc.add(
+      body: BlocBuilder<TransactionBloc, TransactionState>(
+        builder: (context, state) {
+          if (state is TransactionLoadingState) {
+            context.read<UiBloc>().add(UiLoadingEvent());
+            return const SizedBox.shrink();
+          } else if (state is TransactionErrorState) {
+            context.read<UiBloc>().add(
               UiErrorEvent(
                 message: state.message,
-                error: state.error,
-                stackTrace: state.stackTrace,
+                error: Exception(state.message),
+                stackTrace: StackTrace.current,
               ),
             );
+            return const SizedBox.shrink();
+          } else if (state is TransactionLoadedState) {
+            context.read<UiBloc>().add(UiReadyEvent());
+            final transactions = state.transactions;
+            if (transactions.isEmpty) {
+              return const Center(child: Text('No transactions yet'));
+            }
+            return ListView.builder(
+              itemCount: transactions.length,
+              itemBuilder: (context, index) {
+                final transaction = transactions[index];
+                return ItemCard(
+                  date: transaction.dateTime,
+                  description: transaction.description,
+                  amount: transaction.amount,
+                  isExpense: transaction.isExpense,
+                  onTap: () => context.pushNamed(
+                    RouteNames.paymentForm,
+                    extra: transaction,
+                  ),
+                  notes: transaction.notes,
+                );
+              },
+            );
           }
-        },
-        builder: (context, state) {
-          return ListView.builder(
-            itemCount: state.payments.length,
-            itemBuilder: (context, index) {
-              final payment = state.payments[index];
-              return ItemCard(
-                amount: payment.amount,
-                date: payment.date,
-                description: payment.description,
-                isExpense: payment.isExpense,
-                notes: payment.notes,
-                onTap: () => context.pushNamed(
-                  RouteNames.paymentForm,
-                  extra: PaymentModel.fromPaymentData(payment),
-                ),
-              );
-            },
-          );
+          return const SizedBox.shrink();
         },
       ),
     );

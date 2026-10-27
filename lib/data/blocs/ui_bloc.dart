@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:drift/drift.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:trackpense/core/extensions/string_extension.dart';
+import 'package:trackpense/core/extensions/string_extensions.dart';
 
 class UiBloc extends Bloc<UiEvent, UiState> {
   UiBloc() : super(UiReadyState()) {

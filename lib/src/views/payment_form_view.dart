@@ -1,33 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trackpense/core/extensions/color_extension.dart';
-import 'package:trackpense/core/extensions/datetime_extension.dart';
-import 'package:trackpense/core/extensions/double_extension.dart';
-import 'package:trackpense/core/extensions/string_extension.dart';
-import 'package:trackpense/core/utils/comma_separated_decimal_text_input_formatter.dart';
-import 'package:trackpense/core/utils/decimal_text_input_formatter.dart';
-import 'package:trackpense/data/blocs/payment_bloc.dart';
-import 'package:trackpense/data/constants/kjp_colors.dart';
-import 'package:trackpense/data/models/payment_model.dart';
-import 'package:trackpense/src/widgets/kjp_widgets/kjp_text_form_field.dart';
+import 'package:trackpense/core/config/app_config.dart';
+import 'package:trackpense/core/extensions/color_extensions.dart';
+import 'package:trackpense/core/extensions/datetime_extensions.dart';
+import 'package:trackpense/core/extensions/double_extensions.dart';
+import 'package:trackpense/core/extensions/string_extensions.dart';
+import 'package:trackpense/core/theme/app_colors.dart';
+import 'package:trackpense/core/utils/formatters/currency_formatter.dart';
+import 'package:trackpense/core/utils/formatters/decimal_input_formatter.dart';
+import 'package:trackpense/core/widgets/common/inputs/app_text_field.dart';
+import 'package:trackpense/features/transactions/domain/entities/transaction.dart';
+import 'package:trackpense/features/transactions/presentation/blocs/transaction_bloc.dart';
 
 class PaymentFormView extends StatefulWidget {
   const PaymentFormView({super.key, this.payment});
 
-  final PaymentModel? payment;
+  final Transaction? payment;
 
   @override
   State<PaymentFormView> createState() => _PaymentFormViewState();
 }
 
 class _PaymentFormViewState extends State<PaymentFormView> {
-  late final PaymentBloc _paymentBloc;
+  late final TransactionBloc _transactionBloc;
+  late final TextEditingController descriptionController;
+  late final TextEditingController amountController;
+  late final TextEditingController notesController;
+  late final ValueNotifier<DateTime> dateTimeNotifier;
+  late bool isExpense = true;
 
   @override
   void initState() {
     super.initState();
-    _paymentBloc = context.read<PaymentBloc>();
+    _transactionBloc = context.read<TransactionBloc>();
+    descriptionController = TextEditingController();
+    amountController = TextEditingController();
+    notesController = TextEditingController();
+    dateTimeNotifier = ValueNotifier(DateTime.now());
+
+    if (widget.payment != null) {
+      descriptionController.text = widget.payment!.description;
+      amountController.text = widget.payment!.amount.toCommaString();
+      isExpense = widget.payment!.isExpense;
+      dateTimeNotifier.value = widget.payment!.dateTime;
+      notesController.text = widget.payment!.notes ?? '';
+    }
+  }
+
+  @override
+  void dispose() {
+    descriptionController.dispose();
+    amountController.dispose();
+    notesController.dispose();
+    dateTimeNotifier.dispose();
+    super.dispose();
   }
 
   @override
@@ -36,15 +63,6 @@ class _PaymentFormViewState extends State<PaymentFormView> {
     if (!isCreate) assert(widget.payment?.uuid != null);
 
     final formKey = GlobalKey<FormState>();
-    final descriptionController = TextEditingController();
-    final amountController = TextEditingController();
-    final notesController = TextEditingController();
-    final dateTimeNotifier = ValueNotifier<DateTime>(widget.payment?.dateTime ?? DateTime.now());
-
-    descriptionController.text = widget.payment?.description ?? '';
-    amountController.text = widget.payment?.amount.toCommaString() ?? '';
-    notesController.text = widget.payment?.notes ?? '';
-    bool isExpense = widget.payment?.isExpense ?? true;
 
     return Scaffold(
       appBar: AppBar(title: Text('${isCreate ? 'Create' : 'Edit'} Transaction')),
@@ -57,9 +75,9 @@ class _PaymentFormViewState extends State<PaymentFormView> {
                 key: formKey,
                 autovalidateMode: AutovalidateMode.onUnfocus,
                 child: SingleChildScrollView(
-                  child: BlocListener<PaymentBloc, PaymentState>(
+                  child: BlocListener<TransactionBloc, TransactionState>(
                     listener: (context, state) {
-                      if (state is PaymentReadyState) {
+                      if (state is TransactionReadyState) {
                         context.pop();
                       }
                     },
@@ -67,7 +85,7 @@ class _PaymentFormViewState extends State<PaymentFormView> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Description
-                        KjpTextFormField(
+                        AppTextFormField(
                           controller: descriptionController,
                           showTextLengthCounter: true,
                           labelText: 'Description',
@@ -79,7 +97,7 @@ class _PaymentFormViewState extends State<PaymentFormView> {
                         ),
 
                         // Amount
-                        KjpTextFormField(
+                        AppTextFormField(
                           controller: amountController,
                           labelText: 'Amount',
                           keyboardType: TextInputType.number,
@@ -104,8 +122,8 @@ class _PaymentFormViewState extends State<PaymentFormView> {
                                 const SizedBox(width: 12),
                                 Switch.adaptive(
                                   value: isExpense,
-                                  activeTrackColor: KjpColors.expense.darken(0.2),
-                                  inactiveTrackColor: KjpColors.income.darken(0.2),
+                                  activeTrackColor: AppColors.expense.darken(0.2),
+                                  inactiveTrackColor: AppColors.income.darken(0.2),
                                   inactiveThumbColor: Colors.white,
                                   thumbIcon: const WidgetStatePropertyAll(
                                     Icon(
@@ -128,13 +146,13 @@ class _PaymentFormViewState extends State<PaymentFormView> {
                         const SizedBox(height: 12),
 
                         // Notes
-                        KjpTextFormField(
+                        AppTextFormField(
                           controller: notesController,
                           keyboardType: TextInputType.multiline,
                           minLines: 3,
                           maxLines: 6,
                           hintText: 'Enter your text here...',
-                          outlineBOrder: true,
+                          outlineBorder: true,
                         ),
                       ],
                     ),
@@ -151,32 +169,7 @@ class _PaymentFormViewState extends State<PaymentFormView> {
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      if (isCreate) {
-                        _paymentBloc.add(
-                          CreatePaymentEvent(
-                            description: descriptionController.text,
-                            amount: amountController.text.toCleanDouble(),
-                            isExpense: isExpense,
-                            dateTime: dateTimeNotifier.value,
-                            notes: notesController.text,
-                          ),
-                        );
-                      } else {
-                        _paymentBloc.add(
-                          UpdatePaymentEvent(
-                            uuid: widget.payment!.uuid!,
-                            description: descriptionController.text,
-                            amount: amountController.text.toCleanDouble(),
-                            isExpense: isExpense,
-                            dateTime: dateTimeNotifier.value,
-                            notes: notesController.text,
-                          ),
-                        );
-                      }
-                    }
-                  },
+                  onPressed: _submitForm,
                   child: const Text('Save'),
                 ),
               ],
@@ -212,7 +205,7 @@ class _PaymentFormViewState extends State<PaymentFormView> {
                 builder: (_, value, __) => Text(dateTimeNotifier.value.format(format: 'dd/MMM/yyyy')),
               ),
               TextButton(
-                style: TextButton.styleFrom(backgroundColor: KjpColors.primary.lighten(0.8)),
+                style: TextButton.styleFrom(backgroundColor: AppColors.primary.lighten(0.8)),
                 child: const Icon(Icons.calendar_month),
                 onPressed: () async {
                   final selectedDate = await showDatePicker(
@@ -244,7 +237,7 @@ class _PaymentFormViewState extends State<PaymentFormView> {
                 builder: (_, value, __) => Text(dateTimeNotifier.value.format(format: 'hh:mm a')),
               ),
               TextButton(
-                style: TextButton.styleFrom(backgroundColor: KjpColors.primary.lighten(0.8)),
+                style: TextButton.styleFrom(backgroundColor: AppColors.primary.lighten(0.8)),
                 child: const Icon(Icons.watch_later_outlined),
                 onPressed: () async {
                   final selectedTime = await showTimePicker(
@@ -268,6 +261,24 @@ class _PaymentFormViewState extends State<PaymentFormView> {
           ),
         ],
       );
+    }
+  }
+
+  void _submitForm() {
+    final amount = amountController.text.toCleanDouble();
+    final transaction = Transaction(
+      uuid: widget.payment?.uuid ?? AppConfig.uuid.v4(),
+      description: descriptionController.text,
+      amount: amount,
+      isExpense: isExpense,
+      dateTime: dateTimeNotifier.value,
+      notes: notesController.text.isEmpty ? null : notesController.text,
+    );
+
+    if (widget.payment == null) {
+      _transactionBloc.add(TransactionCreateEvent(transaction));
+    } else {
+      _transactionBloc.add(TransactionUpdateEvent(transaction));
     }
   }
 }
