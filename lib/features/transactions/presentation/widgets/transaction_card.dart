@@ -4,8 +4,8 @@ import 'package:trackpense/core/extensions/datetime_extensions.dart';
 import 'package:trackpense/core/extensions/double_extensions.dart';
 import 'package:trackpense/core/theme/app_colors.dart';
 
-class ItemCard extends StatelessWidget {
-  const ItemCard({
+class TransactionCard extends StatelessWidget {
+  const TransactionCard({
     super.key,
     required this.date,
     required this.description,

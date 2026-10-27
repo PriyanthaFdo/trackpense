@@ -15,16 +15,16 @@ import 'package:trackpense/core/widgets/common/inputs/app_text_field.dart';
 import 'package:trackpense/features/transactions/domain/entities/transaction.dart';
 import 'package:trackpense/features/transactions/presentation/blocs/transaction_bloc.dart';
 
-class PaymentFormView extends StatefulWidget {
-  const PaymentFormView({super.key, this.payment});
+class TransactionFormPage extends StatefulWidget {
+  const TransactionFormPage({super.key, this.transaction});
 
-  final Transaction? payment;
+  final Transaction? transaction;
 
   @override
-  State<PaymentFormView> createState() => _PaymentFormViewState();
+  State<TransactionFormPage> createState() => _TransactionFormPageState();
 }
 
-class _PaymentFormViewState extends State<PaymentFormView> {
+class _TransactionFormPageState extends State<TransactionFormPage> {
   final _formKey = GlobalKey<FormState>();
   late final TransactionBloc _transactionBloc;
   late final TextEditingController descriptionController;
@@ -42,12 +42,12 @@ class _PaymentFormViewState extends State<PaymentFormView> {
     notesController = TextEditingController();
     dateTimeNotifier = ValueNotifier(DateTime.now());
 
-    if (widget.payment != null) {
-      descriptionController.text = widget.payment!.description;
-      amountController.text = widget.payment!.amount.toCommaString();
-      isExpense = widget.payment!.isExpense;
-      dateTimeNotifier.value = widget.payment!.dateTime;
-      notesController.text = widget.payment!.notes ?? '';
+    if (widget.transaction != null) {
+      descriptionController.text = widget.transaction!.description;
+      amountController.text = widget.transaction!.amount.toCommaString();
+      isExpense = widget.transaction!.isExpense;
+      dateTimeNotifier.value = widget.transaction!.dateTime;
+      notesController.text = widget.transaction!.notes ?? '';
     }
   }
 
@@ -62,8 +62,7 @@ class _PaymentFormViewState extends State<PaymentFormView> {
 
   @override
   Widget build(BuildContext context) {
-    final isCreate = widget.payment == null;
-    if (!isCreate) assert(widget.payment?.uuid != null);
+    final isCreate = widget.transaction == null;
 
     return Scaffold(
       appBar: AppBar(title: Text('${isCreate ? 'Create' : 'Edit'} Transaction')),
@@ -264,7 +263,7 @@ class _PaymentFormViewState extends State<PaymentFormView> {
 
     final amount = amountController.text.toCleanDouble();
     final transaction = Transaction(
-      uuid: widget.payment?.uuid ?? AppConfig.uuid.v4(),
+      uuid: widget.transaction?.uuid ?? AppConfig.uuid.v4(),
       description: descriptionController.text,
       amount: amount,
       isExpense: isExpense,
@@ -272,7 +271,7 @@ class _PaymentFormViewState extends State<PaymentFormView> {
       notes: notesController.text.isEmpty ? null : notesController.text,
     );
 
-    if (widget.payment == null) {
+    if (widget.transaction == null) {
       _transactionBloc.add(TransactionCreateEvent(transaction));
     } else {
       _transactionBloc.add(TransactionUpdateEvent(transaction));

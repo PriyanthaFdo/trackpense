@@ -1,4 +1,4 @@
 class RouteNames {
   static const String home = '/';
-  static const String paymentForm = '/payment-form';
+  static const String transactionForm = '/transaction-form';
 }

@@ -1,9 +1,9 @@
 import 'package:get_it/get_it.dart';
 import 'package:trackpense/core/database/database.dart';
 import 'package:trackpense/core/logging/app_logger.dart';
+import 'package:trackpense/core/presentation/blocs/ui_bloc.dart';
 import 'package:trackpense/core/storage/preferences_service.dart';
 import 'package:trackpense/core/storage/secure_storage_service.dart';
-import 'package:trackpense/data/blocs/ui_bloc.dart';
 import 'package:trackpense/features/transactions/data/repositories/transaction_repository_impl.dart';
 import 'package:trackpense/features/transactions/domain/repositories/transaction_repository.dart';
 import 'package:trackpense/features/transactions/domain/usecases/create_transaction.dart';

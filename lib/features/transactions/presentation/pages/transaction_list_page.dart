@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trackpense/core/navigation/route_names.dart';
-import 'package:trackpense/data/blocs/ui_bloc.dart';
+import 'package:trackpense/core/presentation/blocs/ui_bloc.dart';
 import 'package:trackpense/features/transactions/presentation/blocs/transaction_bloc.dart';
-import 'package:trackpense/src/widgets/item_card.dart';
+import 'package:trackpense/features/transactions/presentation/widgets/transaction_card.dart';
 
-class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+class TransactionListPage extends StatefulWidget {
+  const TransactionListPage({super.key});
 
   @override
-  State<HomeView> createState() => _HomeViewState();
+  State<TransactionListPage> createState() => _TransactionListPageState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _TransactionListPageState extends State<TransactionListPage> {
   @override
   void initState() {
     super.initState();
@@ -28,7 +28,7 @@ class _HomeViewState extends State<HomeView> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => context.pushNamed(RouteNames.paymentForm),
+            onPressed: () => context.pushNamed(RouteNames.transactionForm),
           ),
         ],
       ),
@@ -62,13 +62,13 @@ class _HomeViewState extends State<HomeView> {
               itemCount: transactions.length,
               itemBuilder: (context, index) {
                 final transaction = transactions[index];
-                return ItemCard(
+                return TransactionCard(
                   date: transaction.dateTime,
                   description: transaction.description,
                   amount: transaction.amount,
                   isExpense: transaction.isExpense,
                   onTap: () => context.pushNamed(
-                    RouteNames.paymentForm,
+                    RouteNames.transactionForm,
                     extra: transaction,
                   ),
                   notes: transaction.notes,

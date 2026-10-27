@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trackpense/core/navigation/route_names.dart';
+import 'package:trackpense/core/presentation/blocs/ui_bloc.dart';
 import 'package:trackpense/core/widgets/common/loading/loading_overlay.dart';
-import 'package:trackpense/data/blocs/ui_bloc.dart';
 import 'package:trackpense/features/transactions/domain/entities/transaction.dart';
-import 'package:trackpense/src/views/home_view.dart';
-import 'package:trackpense/src/views/payment_form_view.dart';
+import 'package:trackpense/features/transactions/presentation/pages/transaction_form_page.dart';
+import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page.dart';
 
 final router = GoRouter(
   routes: [
@@ -48,14 +48,14 @@ final router = GoRouter(
         GoRoute(
           path: RouteNames.home,
           name: RouteNames.home,
-          builder: (context, state) => const HomeView(),
+          builder: (context, state) => const TransactionListPage(),
         ),
         GoRoute(
-          path: RouteNames.paymentForm,
-          name: RouteNames.paymentForm,
+          path: RouteNames.transactionForm,
+          name: RouteNames.transactionForm,
           builder: (context, state) {
             final transaction = state.extra as Transaction?;
-            return PaymentFormView(payment: transaction);
+            return TransactionFormPage(transaction: transaction);
           },
         ),
       ],
