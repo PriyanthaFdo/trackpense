@@ -35,10 +35,11 @@ class TransactionCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Date
-              SizedBox.square(
-                dimension: 55,
+              // Date: at least 55x55, but grows with the system text size instead of overflowing
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 55, maxWidth: 55, minHeight: 55),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       date.format(format: 'E'),
