@@ -32,22 +32,28 @@ class _HomeViewState extends State<HomeView> {
           ),
         ],
       ),
-      body: BlocBuilder<TransactionBloc, TransactionState>(
-        builder: (context, state) {
+      body: BlocConsumer<TransactionBloc, TransactionState>(
+        listener: (context, state) {
+          final uiBloc = context.read<UiBloc>();
           if (state is TransactionLoadingState) {
-            context.read<UiBloc>().add(UiLoadingEvent());
-            return const SizedBox.shrink();
+            uiBloc.add(UiLoadingEvent());
           } else if (state is TransactionErrorState) {
-            context.read<UiBloc>().add(
+            uiBloc.add(
               UiErrorEvent(
                 message: state.message,
                 error: Exception(state.message),
                 stackTrace: StackTrace.current,
               ),
             );
-            return const SizedBox.shrink();
-          } else if (state is TransactionLoadedState) {
-            context.read<UiBloc>().add(UiReadyEvent());
+          } else {
+            uiBloc.add(UiReadyEvent());
+          }
+        },
+        // Ready and Error states come from create/update/delete and carry no list,
+        // so keep showing the last loaded list instead of rebuilding to blank.
+        buildWhen: (previous, current) => current is TransactionLoadingState || current is TransactionLoadedState,
+        builder: (context, state) {
+          if (state is TransactionLoadedState) {
             final transactions = state.transactions;
             if (transactions.isEmpty) {
               return const Center(child: Text('No transactions yet'));
