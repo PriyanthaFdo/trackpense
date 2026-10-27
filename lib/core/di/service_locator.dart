@@ -2,8 +2,6 @@ import 'package:get_it/get_it.dart';
 import 'package:trackpense/core/database/database.dart';
 import 'package:trackpense/core/logging/app_logger.dart';
 import 'package:trackpense/core/presentation/blocs/ui_bloc.dart';
-import 'package:trackpense/core/storage/preferences_service.dart';
-import 'package:trackpense/core/storage/secure_storage_service.dart';
 import 'package:trackpense/features/transactions/data/repositories/transaction_repository_impl.dart';
 import 'package:trackpense/features/transactions/domain/repositories/transaction_repository.dart';
 import 'package:trackpense/features/transactions/domain/usecases/create_transaction.dart';
@@ -21,7 +19,6 @@ Future<void> initServiceLocator() async {
 
   // Register singletons
   _registerCoreServices();
-  _registerStorageServices();
   _registerDataServices();
   _registerBlocs();
 
@@ -34,17 +31,6 @@ void _registerCoreServices() {
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
   
   AppLogger.debug('Core services registered');
-}
-
-/// Registers storage services.
-void _registerStorageServices() {
-  // Preferences service
-  getIt
-    ..registerLazySingleton<PreferencesService>(() => PreferencesService())
-    ..registerLazySingleton<SecureStorageService>(
-        () => InMemorySecureStorageService());
-
-  AppLogger.debug('Storage services registered');
 }
 
 /// Registers data services.

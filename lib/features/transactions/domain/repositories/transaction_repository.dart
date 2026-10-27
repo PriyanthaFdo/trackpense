@@ -15,11 +15,8 @@ abstract class TransactionRepository {
   /// Gets a transaction by UUID.
   Future<Either<Failure, Transaction?>> getTransaction(String uuid);
 
-  /// Gets all transactions as a stream.
+  /// Gets all transactions as a stream, newest first.
   Stream<List<Transaction>> watchAllTransactions();
-
-  /// Gets transactions filtered by date range.
-  Stream<List<Transaction>> watchTransactionsByDateRange(DateTime start, DateTime end);
 }
 
 /// Helper class for Either type (simplified version).

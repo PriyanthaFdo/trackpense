@@ -178,8 +178,8 @@ class _TransactionFormPageState extends State<TransactionFormPage> {
     final now = DateTime.now();
     final displayedDateTime = dateTimeNotifier.value;
 
-    if (now.difference(displayedDateTime).inDays > 7) {
-      // If more than 7 days passed after set date, cannot edit dateTime
+    if (now.difference(displayedDateTime).inDays > AppConfig.transactionEditWindowDays) {
+      // If more than the edit window has passed after set date, cannot edit dateTime
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -205,7 +205,7 @@ class _TransactionFormPageState extends State<TransactionFormPage> {
                   final selectedDate = await showDatePicker(
                     context: context,
                     initialDate: dateTimeNotifier.value,
-                    firstDate: DateTime.now().subtract(const Duration(days: 7)),
+                    firstDate: DateTime.now().subtract(const Duration(days: AppConfig.transactionEditWindowDays)),
                     lastDate: DateTime.now(),
                   );
 

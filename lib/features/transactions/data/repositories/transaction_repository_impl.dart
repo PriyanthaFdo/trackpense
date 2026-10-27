@@ -72,14 +72,4 @@ class TransactionRepositoryImpl implements TransactionRepository {
           .toList();
     });
   }
-
-  @override
-  Stream<List<Transaction>> watchTransactionsByDateRange(DateTime start, DateTime end) {
-    return database.watchAllPayments().map((payments) {
-      return payments
-          .where((payment) => payment.date.isAfter(start) && payment.date.isBefore(end))
-          .map((payment) => TransactionModel.fromPaymentData(payment).toEntity())
-          .toList();
-    });
-  }
 }

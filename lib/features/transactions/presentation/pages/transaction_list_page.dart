@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trackpense/core/navigation/route_names.dart';
 import 'package:trackpense/core/presentation/blocs/ui_bloc.dart';
+import 'package:trackpense/core/widgets/common/feedback/empty_state_widget.dart';
 import 'package:trackpense/features/transactions/presentation/blocs/transaction_bloc.dart';
 import 'package:trackpense/features/transactions/presentation/widgets/transaction_card.dart';
 
@@ -56,7 +57,10 @@ class _TransactionListPageState extends State<TransactionListPage> {
           if (state is TransactionLoadedState) {
             final transactions = state.transactions;
             if (transactions.isEmpty) {
-              return const Center(child: Text('No transactions yet'));
+              return const EmptyStateWidget(
+                icon: Icons.receipt_long_outlined,
+                message: 'No transactions yet',
+              );
             }
             return ListView.builder(
               itemCount: transactions.length,
