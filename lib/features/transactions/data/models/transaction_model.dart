@@ -46,7 +46,7 @@ class TransactionModel {
       amount: Value(amount),
       isExpense: Value(isExpense),
       date: Value(dateTime),
-      notes: notes != null ? Value(notes) : const Value.absent(),
+      notes: Value(notes),
     );
   }
 
