@@ -253,8 +253,8 @@ These rules live in the presentation layer. Moving them into the domain (use cas
 - **Errors:** repositories catch exceptions and return `Either.left(SomeFailure(...))`. BLoCs `fold` the result into states.
 - **Constants** go in `AppConfig`. **Colours** go in `AppColors`.
 - **Commits:** [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `refactor:`, `chore:`, `docs:`), one logical change per commit.
-- **Branches:** `master` holds releases, `dev` is for integration, and short-lived `feat/…`, `fix/…`, `refactor/…` branches merge into `dev` through PRs.
-- **Releases:** bump the `version` in `pubspec.yaml`, add a `CHANGELOG.md` entry, then merge `dev` → `master`.
+- **Branches:** `master` holds releases, `dev` is for integration, and short-lived `feat/…`, `fix/…`, `refactor/…` branches merge into `dev` through PRs. GitHub deletes a PR's branch when it is merged.
+- **Releases:** bump the `version` in `pubspec.yaml` and add a `CHANGELOG.md` entry on `dev`. Then cut `master-merge-YYYYMMDD` from `dev` and merge that into `master` through a PR. `dev` never merges into `master` directly. Steps are in the README.
 
 ---
 

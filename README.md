@@ -66,4 +66,12 @@ Both files are git-ignored. Without `key.properties`, every Android build fails.
 
 ## Releases
 
-Pushing to `master` builds a release APK and publishes a GitHub Release (see `.github/workflows/android-build-release.yml`). Before merging to `master`, bump `version` in `pubspec.yaml` and update `CHANGELOG.md`.
+Pushing to `master` builds a release APK and publishes a GitHub Release (see `.github/workflows/android-build-release.yml`).
+
+`dev` is never merged into `master` directly. Each release goes through its own merge branch:
+
+1. On `dev` (through a normal PR), bump `version` in `pubspec.yaml` and add the `CHANGELOG.md` entry.
+2. Create the merge branch from `dev`, named after the date: `git switch -c master-merge-YYYYMMDD dev` (add `-2` for a second release the same day), and push it.
+3. Open a PR from `master-merge-YYYYMMDD` into `master`. The PR checks run on it; also go through the release checklist in [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md) §7.
+4. Only release fixes go on the merge branch. Bring each one back to `dev` with its own PR.
+5. Merge with **Create a merge commit** (not squash), so `dev` and `master` keep a shared history. GitHub then deletes the merge branch.
