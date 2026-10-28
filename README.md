@@ -12,6 +12,7 @@ Requires [FVM](https://fvm.app). The Flutter version is pinned in `.fvmrc`.
 fvm install
 fvm flutter pub get
 fvm flutter analyze
+fvm flutter test             # unit, widget and database migration tests
 fvm flutter run -d windows   # or: -d chrome, or an Android device
 ```
 
@@ -20,6 +21,10 @@ After changing Drift tables or `lib/core/database/database.dart`, regenerate the
 ```bash
 fvm dart run build_runner build
 ```
+
+## Tests
+
+See [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md) for what is tested, how to write tests, the migration workflow for schema changes, and the integration, system and acceptance tests still to build.
 
 ## Web database files
 
