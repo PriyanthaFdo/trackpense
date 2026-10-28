@@ -203,9 +203,9 @@ These features don't exist yet. Write their acceptance tests when the feature is
 
 ## 7. Release checklist
 
-Run before merging `dev` → `master` (which publishes a release):
+Run on the `master-merge-YYYYMMDD` → `master` PR before merging it (merging publishes a release):
 
-- [ ] PR Checks workflow green on the `dev` → `master` PR
+- [ ] PR Checks workflow green on the release PR
 - [ ] Integration tests pass on Windows and an Android emulator (once §4 exists)
 - [ ] SYS-01, SYS-02, SYS-05 and SYS-15 checked by hand on real hardware
 - [ ] Every acceptance test for changed features passes (§6)
