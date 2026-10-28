@@ -3,7 +3,7 @@ import 'package:trackpense/core/config/app_config.dart';
 /// Validator for amount values.
 class AmountValidator {
   /// Validates an amount value.
-  /// 
+  ///
   /// Returns null if valid, otherwise returns an error message.
   static String? validate(String? value) {
     if (value == null || value.isEmpty) {

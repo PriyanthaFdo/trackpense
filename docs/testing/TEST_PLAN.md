@@ -108,7 +108,7 @@ fvm flutter test integration_test -d windows     # or an Android emulator, or -d
 | INT-06 | Database write fails (inject a failing repository) | The error dialog from the `ShellRoute` listener appears; dismissing it returns to the form | Medium |
 | INT-07 | Persistence: add data, close the database, reopen the same file | All rows are present, newest first | High |
 | INT-08 | **Upgrade from a real v1 database file:** start the app on a fixture `.sqlite` file created by v1.0.x | The app opens, shows every old transaction, and notes are empty; new transactions can be added | High |
-| INT-09 | Web: run on Chrome | `drift_worker.js` and `sqlite3.wasm` load; data survives a page reload (IndexedDB). Also run `dart run tool/setup_web_db.dart --check` in CI. | Medium |
+| INT-09 | Web: run on Chrome | `drift_worker.js` and `sqlite3.wasm` load; data survives a page reload (IndexedDB). (The PR checks already verify the files match the pinned versions.) | Medium |
 | INT-10 | Date window with an injected clock: transactions 6 days, 7 days 10 hours, and 8 days old | Date pickers are shown only within the window, and opening the picker never throws (see finding F-1) | High (after the clock exists) |
 | INT-11 | Back navigation: open the form, press Cancel or system back | Returns to the list with nothing saved | Low |
 
@@ -203,9 +203,9 @@ These features don't exist yet. Write their acceptance tests when the feature is
 
 ## 7. Release checklist
 
-Run before merging `dev` → `master` (which publishes a release):
+Run on the `master-merge-YYYYMMDD` → `master` PR before merging it (merging publishes a release):
 
-- [ ] CI green: `dart format`, `flutter analyze`, `flutter test` (and `setup_web_db.dart --check` once wired in)
+- [ ] PR Checks workflow green on the release PR
 - [ ] Integration tests pass on Windows and an Android emulator (once §4 exists)
 - [ ] SYS-01, SYS-02, SYS-05 and SYS-15 checked by hand on real hardware
 - [ ] Every acceptance test for changed features passes (§6)
@@ -225,4 +225,3 @@ Found while writing the tests; not fixed yet. Give each one an issue and remove 
 | F-3 | **v1 descriptions of 201–255 characters can't be re-saved.** v1 allowed 255 characters, v2 allows 200. Such rows load fine (migration test), but they can't be saved again unchanged: the field and validator only accept 200. | Low: only affects very old, very long entries | Accept, or truncate during a future migration. Document whichever is chosen. |
 | F-4 | **`Transaction.copyWith` can't clear notes.** `copyWith(notes: null)` keeps the old notes, because `null` means "unchanged". | Low today (the form builds a new `Transaction` instead) | Use a sentinel or a `ValueGetter<String?>` parameter if `copyWith` starts being used for edits. |
 | F-5 | **No clock or database injection** (see §4 prerequisites). | Blocks deterministic integration tests | Add both before writing integration tests. |
-| F-6 | **Ten source files don't match `dart format`** (with the project's 200-column setting), most from the AI refactor. | Blocks a CI format check | One `dart format lib` commit when the CI format check is added. |
