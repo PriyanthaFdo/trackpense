@@ -50,12 +50,7 @@ class Transaction {
 
   @override
   int get hashCode {
-    return uuid.hashCode ^
-        description.hashCode ^
-        amount.hashCode ^
-        isExpense.hashCode ^
-        dateTime.hashCode ^
-        notes.hashCode;
+    return uuid.hashCode ^ description.hashCode ^ amount.hashCode ^ isExpense.hashCode ^ dateTime.hashCode ^ notes.hashCode;
   }
 
   @override

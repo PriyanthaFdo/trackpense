@@ -67,9 +67,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Stream<List<Transaction>> watchAllTransactions() {
     return database.watchAllPayments().map((payments) {
-      return payments
-          .map((payment) => TransactionModel.fromPaymentData(payment).toEntity())
-          .toList();
+      return payments.map((payment) => TransactionModel.fromPaymentData(payment).toEntity()).toList();
     });
   }
 }

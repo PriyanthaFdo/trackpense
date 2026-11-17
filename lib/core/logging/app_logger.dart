@@ -50,7 +50,7 @@ class AppLogger {
 
     final levelString = level.name.toUpperCase();
     final timestamp = DateTime.now().toIso8601String();
-    
+
     log(
       '[$timestamp] [$levelString] $message',
       error: error,

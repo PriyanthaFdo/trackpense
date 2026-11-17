@@ -14,22 +14,16 @@ class TransactionModel {
   });
 
   /// Creates a TransactionModel from PaymentData (Drift).
-  TransactionModel.fromPaymentData(PaymentData data)
-      : uuid = data.uuid,
-        description = data.description,
-        amount = data.amount,
-        isExpense = data.isExpense,
-        dateTime = data.date,
-        notes = data.notes;
+  TransactionModel.fromPaymentData(PaymentData data) : uuid = data.uuid, description = data.description, amount = data.amount, isExpense = data.isExpense, dateTime = data.date, notes = data.notes;
 
   /// Creates a TransactionModel from domain entity.
   TransactionModel.fromEntity(Transaction entity)
-      : uuid = entity.uuid,
-        description = entity.description,
-        amount = entity.amount,
-        isExpense = entity.isExpense,
-        dateTime = entity.dateTime,
-        notes = entity.notes;
+    : uuid = entity.uuid,
+      description = entity.description,
+      amount = entity.amount,
+      isExpense = entity.isExpense,
+      dateTime = entity.dateTime,
+      notes = entity.notes;
 
   final String uuid;
   final String description;

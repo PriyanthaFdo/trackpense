@@ -70,6 +70,7 @@ See [README.md](README.md) for setup commands, Android signing and the release p
 - **Android builds, debug included, need `android/key.properties`.** Both build types are signed with the release keystore (see [android/app/build.gradle.kts](android/app/build.gradle.kts)). Without that file, Gradle fails.
 - **A debug build on your own phone replaces the installed release app.** Both use the same app ID and key, so the debug build runs database migrations on your real data. Until dev/prod flavors exist, test risky changes on Windows, web, or an emulator.
 - **Merging to `master` publishes a release.** CI ([.github/workflows/android-build-release.yml](.github/workflows/android-build-release.yml)) builds a signed APK and creates a GitHub Release tagged `v<version>_<run_number>`. Day-to-day work goes to `dev` through feature branches.
+- **Every PR runs checks** ([.github/workflows/pr-checks.yml](.github/workflows/pr-checks.yml)): formatting, analyze, generated code and schema snapshots up to date, web database files current, and tests. The README lists the local fix for each.
 
 ---
 
@@ -240,7 +241,7 @@ These rules live in the presentation layer. Moving them into the domain (use cas
 5. **No startup error screen.** If DI init fails, the app stays on the spinner.
 6. **No length limit on notes.**
 7. **No dev/prod separation.** Debug and release share an app ID and signing key (see §4).
-8. **No integration, system or acceptance tests yet,** and no CI checks on pull requests (CI only builds releases on `master`). See the plan and open findings in [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md) §4–§8.
+8. **No integration, system or acceptance tests yet.** See the plan and open findings in [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md) §4–§8.
 
 ---
 
@@ -252,8 +253,8 @@ These rules live in the presentation layer. Moving them into the domain (use cas
 - **Errors:** repositories catch exceptions and return `Either.left(SomeFailure(...))`. BLoCs `fold` the result into states.
 - **Constants** go in `AppConfig`. **Colours** go in `AppColors`.
 - **Commits:** [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `refactor:`, `chore:`, `docs:`), one logical change per commit.
-- **Branches:** `master` holds releases, `dev` is for integration, and short-lived `feat/…`, `fix/…`, `refactor/…` branches merge into `dev` through PRs.
-- **Releases:** bump the `version` in `pubspec.yaml`, add a `CHANGELOG.md` entry, then merge `dev` → `master`.
+- **Branches:** `master` holds releases, `dev` is for integration, and short-lived `feat/…`, `fix/…`, `refactor/…` branches merge into `dev` through PRs. GitHub deletes a PR's branch when it is merged.
+- **Releases:** bump the `version` in `pubspec.yaml` and add a `CHANGELOG.md` entry on `dev`. Then cut `master-merge-YYYYMMDD` from `dev` and merge that into `master` through a PR. `dev` never merges into `master` directly. Steps are in the README.
 
 ---
 
@@ -266,7 +267,8 @@ These rules live in the presentation layer. Moving them into the domain (use cas
    - Integration tests (needs injectable database and clock first), then the system and acceptance checklists. See [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md).
    - Dev/prod build flavors with separate app IDs.
 3. **Team workflow.**
-   - PR checks in CI: format, analyze, test, build.
+   - ✅ PR checks in CI: format, analyze, generated code, schema snapshots, web database files, tests.
+   - A debug build in the PR checks (Android needs signing secrets, so maybe web or Windows).
    - Branch protection on `dev` and `master`.
    - Releases triggered by tags.
    - PR and issue templates, `CONTRIBUTING.md`, architecture decision records in `docs/adr/`.
