@@ -18,6 +18,12 @@
       "type": "dart",
       "program": "lib/main.dart",
       "deviceId": "windows"
+    },
+    {
+        "name": "Trackpense (Android)",
+        "request": "launch",
+        "type": "dart",
+        "program": "lib/main.dart"
     }
   ]
 }
