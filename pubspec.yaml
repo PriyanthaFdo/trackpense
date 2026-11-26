@@ -6,10 +6,10 @@ version: 2.1.0
 
 environment:
   sdk: ^3.9.0
-  flutter: 3.44.5
+  flutter: 3.50.1
 
 dependencies:
-  drift_flutter: ^0.2.5
+  drift_flutter: ^0.3.1
   drift: ^2.28.1
   flutter_bloc: ^9.1.1
   flutter: {sdk: flutter}
