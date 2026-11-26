@@ -17,6 +17,7 @@ dependencies:
   go_router: ^16.1.0
   intl: any
   loading_indicator: ^3.1.1
+  material_ui: ^1.11.1
   path_provider: ^2.1.5
   uuid: ^4.5.1
 
