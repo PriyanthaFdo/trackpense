@@ -39,28 +39,14 @@ class AppTextFormField extends StatefulWidget {
 class _AppTextFormFieldState extends State<AppTextFormField> {
   @override
   Widget build(BuildContext context) {
-    final textLength = widget.controller.text.length;
     final effectiveMaxLength = widget.maxLength ?? AppConfig.maxDescriptionLength;
 
     return TextFormField(
       controller: widget.controller,
-      onChanged: widget.showTextLengthCounter ? (value) => setState(() {}) : null,
       decoration: InputDecoration(
         labelText: widget.labelText,
         hintText: widget.hintText,
         border: widget.outlineBorder ? const OutlineInputBorder() : null,
-        helper: widget.showTextLengthCounter
-            ? Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  '$textLength/$effectiveMaxLength',
-                  style: TextStyle(
-                    color: textLength > effectiveMaxLength ? Colors.red : Colors.grey,
-                    fontSize: 10,
-                  ),
-                ),
-              )
-            : null,
       ),
       autovalidateMode: widget.autovalidateMode,
       validator: widget.validator,

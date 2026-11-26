@@ -79,5 +79,4 @@ Pushing to `master` builds a release APK and publishes a GitHub Release (see `.g
 <hr />
 
 ### Known Issues
-- Description text field displays text count twice
 - In windows mode, extremely reducing horizontal size results in text overflowing widget
