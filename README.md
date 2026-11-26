@@ -49,8 +49,8 @@ On the web, Drift needs two extra files in `web/`: `drift_worker.js` and `sqlite
 - after upgrading `drift` or `sqlite3`.
 
 ```bash
-fvm dart run tool/setup_web_db.dart          # download the matching files into web/
-fvm dart run tool/setup_web_db.dart --check  # verify only; exits with code 1 if out of date
+dart run tool/setup_web_db.dart          # download the matching files into web/
+dart run tool/setup_web_db.dart --check  # verify only; exits with code 1 if out of date
 ```
 
 Commit the updated files.
