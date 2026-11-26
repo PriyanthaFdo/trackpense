@@ -1,4 +1,5 @@
 import 'package:trackpense/core/error/failures.dart';
+import 'package:trackpense/core/utils/sanitizers/text_sanitizer.dart';
 import 'package:trackpense/features/transactions/domain/entities/transaction.dart';
 import 'package:trackpense/features/transactions/domain/repositories/transaction_repository.dart';
 
@@ -9,6 +10,10 @@ class CreateTransaction {
   final TransactionRepository repository;
 
   Future<Either<Failure, void>> call(Transaction transaction) {
-    return repository.createTransaction(transaction);
+    final sanitizedTransaction = transaction.copyWith(
+      notes: TextSanitizer.sanitize(transaction.notes),
+    );
+
+    return repository.createTransaction(sanitizedTransaction);
   }
 }
