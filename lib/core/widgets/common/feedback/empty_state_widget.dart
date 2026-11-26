@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:trackpense/core/theme/app_colors.dart';
 
 /// A widget that displays an empty state with an icon and message.

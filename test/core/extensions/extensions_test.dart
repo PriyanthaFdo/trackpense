@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:trackpense/core/extensions/color_extensions.dart';
 import 'package:trackpense/core/extensions/datetime_extensions.dart';
 import 'package:trackpense/core/extensions/double_extensions.dart';
@@ -23,7 +23,7 @@ void main() {
   });
 
   group('StringExtensions.toSentenceCase', () {
-    test('capitalises the first letter and lowercases the rest', () {
+    test('capitalizes the first letter and lowercases the rest', () {
       expect('hELLO wORLD'.toSentenceCase(), 'Hello world');
     });
 

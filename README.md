@@ -75,3 +75,8 @@ Pushing to `master` builds a release APK and publishes a GitHub Release (see `.g
 3. Open a PR from `master-merge-YYYYMMDD` into `master`. The PR checks run on it; also go through the release checklist in [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md) §7.
 4. Only release fixes go on the merge branch. Bring each one back to `dev` with its own PR.
 5. Merge with **Create a merge commit** (not squash), so `dev` and `master` keep a shared history. GitHub then deletes the merge branch.
+
+<hr />
+
+### Known Issues
+- Description text field displays text count twice
