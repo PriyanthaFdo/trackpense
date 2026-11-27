@@ -49,8 +49,8 @@ On the web, Drift needs two extra files in `web/`: `drift_worker.js` and `sqlite
 - after upgrading `drift` or `sqlite3`.
 
 ```bash
-fvm dart run tool/setup_web_db.dart          # download the matching files into web/
-fvm dart run tool/setup_web_db.dart --check  # verify only; exits with code 1 if out of date
+dart run tool/setup_web_db.dart          # download the matching files into web/
+dart run tool/setup_web_db.dart --check  # verify only; exits with code 1 if out of date
 ```
 
 Commit the updated files.
@@ -75,3 +75,8 @@ Pushing to `master` builds a release APK and publishes a GitHub Release (see `.g
 3. Open a PR from `master-merge-YYYYMMDD` into `master`. The PR checks run on it; also go through the release checklist in [docs/testing/TEST_PLAN.md](docs/testing/TEST_PLAN.md) §7.
 4. Only release fixes go on the merge branch. Bring each one back to `dev` with its own PR.
 5. Merge with **Create a merge commit** (not squash), so `dev` and `master` keep a shared history. GitHub then deletes the merge branch.
+
+<hr />
+
+### Known Issues
+- In windows mode, extremely reducing horizontal size results in text overflowing widget

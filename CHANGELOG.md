@@ -1,3 +1,13 @@
+## 2.2.0
+- Fixed the notes text field showing its character count twice
+- Upgraded Flutter 3.44.5 -> 3.50.1
+  - Migrated from deprecated `flutter/material.dart` imports to the `material_ui` package
+  - Updated `drift_flutter` to 0.3.1 and refreshed Drift web database files
+  - Fixed Android build issues (Gradle wrapper and plugin updates)
+- Web debug launch now runs on fixed port 8080
+- Added tests for notes text sanitization
+- Added Dependabot for weekly pub, Gradle and GitHub Actions dependency updates (targeting `dev`)
+
 ## 2.1.0 
 - Text in notes field will now be sanitized before being stored during create and update. Sanitization steps are as follows;
     1. All text will be split into 3 groups - 'pre-text', 'text', 'post-text'.

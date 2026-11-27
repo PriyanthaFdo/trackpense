@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:trackpense/core/di/service_locator.dart';
 import 'package:trackpense/core/logging/app_logger.dart';
 import 'package:trackpense/core/navigation/app_router.dart';
