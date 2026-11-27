@@ -196,7 +196,7 @@ class _TransactionFormPageState extends State<TransactionFormPage> {
             children: [
               ValueListenableBuilder(
                 valueListenable: dateTimeNotifier,
-                builder: (_, value, __) => Text(dateTimeNotifier.value.format(format: 'dd/MMM/yyyy')),
+                builder: (_, value, _) => Text(dateTimeNotifier.value.format(format: 'dd/MMM/yyyy')),
               ),
               TextButton(
                 style: TextButton.styleFrom(backgroundColor: AppColors.primary.lighten(0.8)),
@@ -228,7 +228,7 @@ class _TransactionFormPageState extends State<TransactionFormPage> {
             children: [
               ValueListenableBuilder(
                 valueListenable: dateTimeNotifier,
-                builder: (_, value, __) => Text(dateTimeNotifier.value.format(format: 'hh:mm a')),
+                builder: (_, value, _) => Text(dateTimeNotifier.value.format(format: 'hh:mm a')),
               ),
               TextButton(
                 style: TextButton.styleFrom(backgroundColor: AppColors.primary.lighten(0.8)),
