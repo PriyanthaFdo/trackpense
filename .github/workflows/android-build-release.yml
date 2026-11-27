@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -73,7 +73,7 @@ jobs:
         run: flutter build apk --release --no-pub
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: flutter-apk
           path: build/app/outputs/flutter-apk/app-release.apk
@@ -85,16 +85,16 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download Built APK
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: flutter-apk
           path: build/app/outputs/flutter-apk
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.build.outputs.version }}_${{ github.run_number }}
           name: "Release v${{ needs.build.outputs.version }}"

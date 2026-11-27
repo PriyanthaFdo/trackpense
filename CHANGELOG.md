@@ -1,3 +1,16 @@
+## 2.3.0
+- Updated dependencies:
+  - `get_it` 7.7.0 -> 9.3.0
+  - `go_router` 16.3.0 -> 18.1.4
+  - `loading_indicator` 3.1.1 -> 4.0.2
+  - `flutter_lints` 5.0.0 -> 6.0.0
+- Updated Android build toolchain:
+  - Gradle 9.5.0 -> 9.9.2
+  - Android Gradle Plugin 9.3.1 -> 9.5.3
+  - Kotlin 2.4.20 -> 2.4.21
+- Updated GitHub Actions to current major versions (`actions/checkout` v7, `actions/upload-artifact` v7, `actions/download-artifact` v8, and `softprops/action-gh-release` v3)
+- Fixed `flutter_lints` 6.0.0 double-dash warnings in the transaction form
+
 ## 2.2.0
 - Fixed the notes text field showing its character count twice
 - Upgraded Flutter 3.44.5 -> 3.50.1
