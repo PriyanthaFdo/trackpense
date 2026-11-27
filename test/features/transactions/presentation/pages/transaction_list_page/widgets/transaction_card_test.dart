@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:trackpense/core/extensions/color_extensions.dart';
 import 'package:trackpense/core/theme/app_colors.dart';
-import 'package:trackpense/features/transactions/presentation/widgets/transaction_card.dart';
+import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page/widgets/transaction_card.dart';
 
 Future<void> _pumpCard(
   WidgetTester tester, {

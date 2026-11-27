@@ -5,12 +5,12 @@ import 'package:trackpense/core/error/failures.dart';
 import 'package:trackpense/core/presentation/blocs/ui_bloc.dart';
 import 'package:trackpense/features/transactions/domain/entities/transaction.dart';
 import 'package:trackpense/features/transactions/presentation/blocs/transaction_bloc.dart';
-import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page.dart';
-import 'package:trackpense/features/transactions/presentation/widgets/transaction_card.dart';
+import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page/transaction_list_page.dart';
+import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page/widgets/transaction_card.dart';
 
-import '../../../../helpers/fake_transaction_repository.dart';
-import '../../../../helpers/transaction_bloc_factory.dart';
-import '../../../../helpers/transaction_fixtures.dart';
+import '../../../../../helpers/fake_transaction_repository.dart';
+import '../../../../../helpers/transaction_bloc_factory.dart';
+import '../../../../../helpers/transaction_fixtures.dart';
 
 class _Harness {
   _Harness(this.repository);
