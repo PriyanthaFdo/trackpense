@@ -5,7 +5,7 @@ import 'package:trackpense/core/navigation/route_names.dart';
 import 'package:trackpense/core/presentation/blocs/ui_bloc.dart';
 import 'package:trackpense/core/widgets/common/feedback/empty_state_widget.dart';
 import 'package:trackpense/features/transactions/presentation/blocs/transaction_bloc.dart';
-import 'package:trackpense/features/transactions/presentation/widgets/transaction_card.dart';
+import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page/widgets/transaction_card.dart';
 
 class TransactionListPage extends StatefulWidget {
   const TransactionListPage({super.key});

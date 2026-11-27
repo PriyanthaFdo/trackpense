@@ -6,11 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:trackpense/core/error/failures.dart';
 import 'package:trackpense/features/transactions/domain/entities/transaction.dart';
-import 'package:trackpense/features/transactions/presentation/pages/transaction_form_page.dart';
+import 'package:trackpense/features/transactions/presentation/pages/transaction_form_page/transaction_form_page.dart';
 
-import '../../../../helpers/fake_transaction_repository.dart';
-import '../../../../helpers/transaction_bloc_factory.dart';
-import '../../../../helpers/transaction_fixtures.dart';
+import '../../../../../helpers/fake_transaction_repository.dart';
+import '../../../../../helpers/transaction_bloc_factory.dart';
+import '../../../../../helpers/transaction_fixtures.dart';
 
 final _descriptionField = find.byType(TextFormField).at(0);
 final _amountField = find.byType(TextFormField).at(1);

@@ -5,8 +5,8 @@ import 'package:trackpense/core/navigation/route_names.dart';
 import 'package:trackpense/core/presentation/blocs/ui_bloc.dart';
 import 'package:trackpense/core/widgets/common/loading/loading_overlay.dart';
 import 'package:trackpense/features/transactions/domain/entities/transaction.dart';
-import 'package:trackpense/features/transactions/presentation/pages/transaction_form_page.dart';
-import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page.dart';
+import 'package:trackpense/features/transactions/presentation/pages/transaction_form_page/transaction_form_page.dart';
+import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page/transaction_list_page.dart';
 
 final router = GoRouter(
   routes: [
