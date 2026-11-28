@@ -6,6 +6,7 @@ import 'package:trackpense/core/presentation/blocs/ui_bloc.dart';
 import 'package:trackpense/features/transactions/domain/entities/transaction.dart';
 import 'package:trackpense/features/transactions/presentation/blocs/transaction_bloc.dart';
 import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page/transaction_list_page.dart';
+import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page/widgets/summary_bar.dart';
 import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page/widgets/transaction_card.dart';
 
 import '../../../../../helpers/fake_transaction_repository.dart';
@@ -55,6 +56,26 @@ void main() {
     expect(find.byType(TransactionCard), findsNWidgets(2));
     expect(find.text('Groceries'), findsOneWidget);
     expect(find.text('Salary'), findsOneWidget);
+  });
+
+  testWidgets('shows a summary of total income, expense and balance', (tester) async {
+    await _pumpPage(tester, [
+      buildTransaction(uuid: 'a', amount: 100),
+      buildTransaction(uuid: 'b', amount: 50),
+      buildTransaction(uuid: 'c', description: 'Salary', amount: 400, isExpense: false),
+      buildTransaction(uuid: 'd', description: 'Bonus', amount: 600, isExpense: false),
+    ]);
+
+    expect(find.byType(SummaryBar), findsOneWidget);
+    expect(find.text('150.00'), findsOneWidget);
+    expect(find.text('1,000.00'), findsOneWidget);
+    expect(find.text('850.00'), findsOneWidget);
+  });
+
+  testWidgets('hides the summary when there are no transactions', (tester) async {
+    await _pumpPage(tester);
+
+    expect(find.byType(SummaryBar), findsNothing);
   });
 
   testWidgets('tells UiBloc loading has finished once data arrives', (tester) async {

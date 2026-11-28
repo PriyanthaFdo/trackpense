@@ -5,6 +5,7 @@ import 'package:trackpense/core/navigation/route_names.dart';
 import 'package:trackpense/core/presentation/blocs/ui_bloc.dart';
 import 'package:trackpense/core/widgets/common/feedback/empty_state_widget.dart';
 import 'package:trackpense/features/transactions/presentation/blocs/transaction_bloc.dart';
+import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page/widgets/summary_bar.dart';
 import 'package:trackpense/features/transactions/presentation/pages/transaction_list_page/widgets/transaction_card.dart';
 
 class TransactionListPage extends StatefulWidget {
@@ -62,22 +63,34 @@ class _TransactionListPageState extends State<TransactionListPage> {
                 message: 'No transactions yet',
               );
             }
-            return ListView.builder(
-              itemCount: transactions.length,
-              itemBuilder: (context, index) {
-                final transaction = transactions[index];
-                return TransactionCard(
-                  date: transaction.dateTime,
-                  description: transaction.description,
-                  amount: transaction.amount,
-                  isExpense: transaction.isExpense,
-                  onTap: () => context.pushNamed(
-                    RouteNames.transactionForm,
-                    extra: transaction,
+            final income = transactions.fold<double>(0, (sum, t) => sum + (t.isExpense ? 0 : t.amount));
+            final expense = transactions.fold<double>(0, (sum, t) => sum + (t.isExpense ? t.amount : 0));
+            return Column(
+              children: [
+                SummaryBar(
+                  income: income,
+                  expense: expense,
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: transactions.length,
+                    itemBuilder: (context, index) {
+                      final transaction = transactions[index];
+                      return TransactionCard(
+                        date: transaction.dateTime,
+                        description: transaction.description,
+                        amount: transaction.amount,
+                        isExpense: transaction.isExpense,
+                        onTap: () => context.pushNamed(
+                          RouteNames.transactionForm,
+                          extra: transaction,
+                        ),
+                        notes: transaction.notes,
+                      );
+                    },
                   ),
-                  notes: transaction.notes,
-                );
-              },
+                ),
+              ],
             );
           }
           return const SizedBox.shrink();
